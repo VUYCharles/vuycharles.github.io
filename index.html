@@ -221,7 +221,6 @@
             filter: invert(9%) sepia(13%) saturate(1243%) hue-rotate(91deg) brightness(94%) contrast(91%);
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -283,7 +282,6 @@
             }
         }
 
-        /* Language switching */
         .lang-en {
             display: none;
         }
@@ -424,8 +422,6 @@
     </main>
 
     <footer>
-        <!-- <p class="lang-fr">© 2023 Portfolio Minimaliste. Tous droits réservés.</p>
-        <p class="lang-en">© 2023 Minimalist Portfolio. All rights reserved.</p> -->
         <p style="margin-top: 0.5rem; font-size: 0.9rem;">
             <a href="#" style="color: var(--vert-principal);" class="lang-fr">Mentions légales</a>
             <a href="#" style="color: var(--vert-principal);" class="lang-en">Legal notice</a> | 
@@ -448,7 +444,6 @@
             });
         }
 
-        // Initialize with French visible and English hidden
         document.addEventListener('DOMContentLoaded', function() {
             const enElements = document.querySelectorAll('.lang-en');
             enElements.forEach(el => {
