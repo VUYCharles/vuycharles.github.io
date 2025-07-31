@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinthe - VuyCharles</title>
+    <style>
+        :root {
+            --vert-principal: #2ecc71;
+            --vert-fonce: #27ae60;
+            --noir: #121212;
+            --gris-fonce: #1e1e1e;
+            --gris-clair: #f5f5f5;
+            --blanc: #ffffff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--gris-clair);
+            background-color: var(--noir);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--gris-fonce);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--vert-principal);
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--vert-principal);
+            margin: 0;
+        }
+
+        nav a {
+            color: var(--gris-clair);
+            text-decoration: none;
+            transition: color 0.3s;
+            margin-left: 1.5rem;
+        }
+
+        nav a:hover {
+            color: var(--vert-principal);
+        }
+
+        .language-switcher {
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .language-switcher:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .project-image {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--vert-principal);
+        }
+
+        .project-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .project-info {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .project-links {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .project-link:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        .project-section {
+            background-color: var(--gris-fonce);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--vert-principal);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background-color: rgba(46, 204, 113, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--vert-principal);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--gris-fonce);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .project-header {
+                flex-direction: column;
+            }
+            
+            .project-image, .project-info {
+                min-width: 100%;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav {
+                margin-top: 1rem;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav a {
+                margin: 0.5rem;
+            }
+            
+            .language-switcher {
+                margin: 1rem auto 0;
+            }
+        }
+
+        /* Language switching */
+        .lang-en {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTNycHdpbHdlNzJpMHZrMW9zcHlhejAxOWF1aXl4ZnR1b3V6Zzg0byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohjVcFJg92HXsVppS/giphy.gif" alt="Profile" class="profile-pic">
+            <h1 class="lang-fr">VuyCharles</h1>
+            <h1 class="lang-en">VuyCharles</h1>
+        </div>
+        <nav>
+            <a href="index.html" class="lang-fr">Accueil</a>
+            <a href="index.html" class="lang-en">Home</a>
+            <a href="index.html#projets" class="lang-fr">Projets</a>
+            <a href="index.html#projets" class="lang-en">Projects</a>
+            <a href="index.html#projets-academiques" class="lang-fr">Projets Académiques</a>
+            <a href="index.html#projets-academiques" class="lang-en">Academic Projects</a>
+            <a href="index.html#blog" class="lang-fr">Blog</a>
+            <a href="index.html#blog" class="lang-en">Blog</a>
+            <a href="index.html#about" class="lang-fr">À propos</a>
+            <a href="index.html#about" class="lang-en">About</a>
+            <a href="index.html#contact" class="lang-fr">Contact</a>
+            <a href="index.html#contact" class="lang-en">Contact</a>
+            <button class="language-switcher" onclick="toggleLanguage()">EN/FR</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="project-header">
+            <div class="project-image">
+                <img src="https://raw.githubusercontent.com/VUYCharles/Labyrinthe/main/screenshot.png" alt="Capture d'écran du projet Labyrinthe">
+            </div>
+            <div class="project-info">
+                <h2 class="lang-fr">Générateur de Labyrinthe</h2>
+                <h2 class="lang-en">Maze Generator</h2>
+                <p class="lang-fr">Un générateur et solveur de labyrinthes implémentant plusieurs algorithmes avec une interface graphique interactive en Java.</p>
+                <p class="lang-en">A maze generator and solver implementing several algorithms with an interactive graphical interface in Java.</p>
+                
+                <div class="project-links">
+                    <a href="https://github.com/VUYCharles/Labyrinthe" class="project-link" target="_blank">
+                        <span class="lang-fr">Voir sur GitHub</span>
+                        <span class="lang-en">View on GitHub</span>
+                    </a>
+                    <a href="https://github.com/VUYCharles/Labyrinthe/archive/refs/heads/main.zip" class="project-link" target="_blank">
+                        <span class="lang-fr">Télécharger</span>
+                        <span class="lang-en">Download</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="project-section">
+            <h3 class="lang-fr">À propos du projet</h3>
+            <h3 class="lang-en">About the Project</h3>
+            <p class="lang-fr">Ce projet Java implémente plusieurs algorithmes classiques de génération et de résolution de labyrinthes. L'application permet de visualiser étape par étape le fonctionnement des algorithmes et de comparer leurs résultats grâce à une interface Swing.</p>
+            <p class="lang-en">This Java project implements several classic maze generation and solving algorithms. The application allows step-by-step visualization of the algorithms' operation and comparison of their results through a Swing interface.</p>
+        </div>
+
+        <div class="project-section">
+            <h3 class="lang-fr">Fonctionnalités</h3>
+            <h3 class="lang-en">Features</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h4 class="lang-fr">Algorithmes de génération</h4>
+                    <h4 class="lang-en">Generation algorithms</h4>
+                    <p class="lang-fr">Implémente plusieurs méthodes : exploration exhaustive, backtracking, Prim randomisé, Kruskal, division récursive.</p>
+                    <p class="lang-en">Implements several methods: exhaustive search, backtracking, randomized Prim's, Kruskal's, recursive division.</p>
+                </div>
+                <div class="feature-card">
+                    <h4 class="lang-fr">Algorithmes de résolution</h4>
+                    <h4 class="lang-en">Solving algorithms</h4>
+                    <p class="lang-fr">Plusieurs approches implémentées : A*, Dijkstra, recherche en profondeur, recherche en largeur.</p>
+                    <p class="lang-en">Several approaches implemented: A*, Dijkstra, depth-first search, breadth-first search.</p>
+                </div>
+                <div class="feature-card">
+                    <h4 class="lang-fr">Visualisation étape par étape</h4>
+                    <h4 class="lang-en">Step-by-step visualization</h4>
+                    <p class="lang-fr">Possibilité de voir l'exécution des algorithmes en temps réel avec contrôle de la vitesse.</p>
+                    <p class="lang-en">Ability to see algorithm execution in real-time with speed control.</p>
+                </div>
+                <div class="feature-card">
+                    <h4 class="lang-fr">Interface Swing</h4>
+                    <h4 class="lang-en">Swing interface</h4>
+                    <p class="lang-fr">Interface graphique intuitive avec personnalisation de la taille du labyrinthe et sélection des algorithmes.</p>
+                    <p class="lang-en">Intuitive graphical interface with maze size customization and algorithm selection.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="project-section">
+            <h3 class="lang-fr">Technologies utilisées</h3>
+            <h3 class="lang-en">Technologies Used</h3>
+            <ul class="lang-fr">
+                <li>Java 17 - Langage principal</li>
+                <li>Java Swing - Pour l'interface graphique</li>
+                <li>Java AWT - Pour le rendu graphique</li>
+                <li>Git - Gestion de version</li>
+            </ul>
+            <ul class="lang-en">
+                <li>Java 17 - Main language</li>
+                <li>Java Swing - For the graphical interface</li>
+                <li>Java AWT - For graphic rendering</li>
+                <li>Git - Version control</li>
+            </ul>
+        </div>
+
+        <div class="project-section">
+            <h3 class="lang-fr">Comment l'utiliser</h3>
+            <h3 class="lang-en">How to Use</h3>
+            <ol class="lang-fr">
+                <li>Téléchargez le projet depuis GitHub</li>
+                <li>Compilez avec Java 17 ou plus récent</li>
+                <li>Exécutez la classe principale</li>
+                <li>Utilisez l'interface pour générer et résoudre des labyrinthes</li>
+                <li>Explorez les différents algorithmes disponibles</li>
+            </ol>
+            <ol class="lang-en">
+                <li>Download the project from GitHub</li>
+                <li>Compile with Java 17 or newer</li>
+                <li>Run the main class</li>
+                <li>Use the interface to generate and solve mazes</li>
+                <li>Explore the different available algorithms</li>
+            </ol>
+        </div>
+    </main>
+
+    <footer>
+        <p class="lang-fr">© 2023 Portfolio Minimaliste. Tous droits réservés.</p>
+        <p class="lang-en">© 2023 Minimalist Portfolio. All rights reserved.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            <a href="#" style="color: var(--vert-principal);" class="lang-fr">Mentions légales</a>
+            <a href="#" style="color: var(--vert-principal);" class="lang-en">Legal notice</a> | 
+            <a href="#" style="color: var(--vert-principal);">LinkedIn</a> | 
+            <a href="#" style="color: var(--vert-principal);">GitHub</a>
+        </p>
+    </footer>
+
+    <script>
+        function toggleLanguage() {
+            const frElements = document.querySelectorAll('.lang-fr');
+            const enElements = document.querySelectorAll('.lang-en');
+            
+            frElements.forEach(el => {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            enElements.forEach(el => {
+                el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        // Initialize with French visible and English hidden
+        document.addEventListener('DOMContentLoaded', function() {
+            const enElements = document.querySelectorAll('.lang-en');
+            enElements.forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

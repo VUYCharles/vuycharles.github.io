@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VuyCharles</title>
+    <style>
+        :root {
+            --vert-principal: #2ecc71;
+            --vert-fonce: #27ae60;
+            --noir: #121212;
+            --gris-fonce: #1e1e1e;
+            --gris-clair: #f5f5f5;
+            --blanc: #ffffff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--gris-clair);
+            background-color: var(--noir);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--gris-fonce);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--vert-principal);
+        }
+
+        h1, h2, h3 {
+            color: var(--vert-principal);
+            margin: 0;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        nav a {
+            color: var(--gris-clair);
+            text-decoration: none;
+            transition: color 0.3s;
+            white-space: nowrap;
+            padding: 0.5rem 0;
+        }
+
+        nav a:hover {
+            color: var(--vert-principal);
+        }
+
+        .language-switcher {
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-left: 1rem;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .language-switcher:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        .projets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .projet, .article, .about-card {
+            background-color: var(--gris-fonce);
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid var(--vert-principal);
+        }
+
+        .projet:hover, .article:hover, .about-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.1);
+        }
+
+        .about-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .about-card {
+            flex: 1 1 300px;
+            display: flex;
+            align-items: center;
+            min-height: 120px;
+        }
+
+        .about-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(46, 204, 113, 0.1);
+            border-radius: 8px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .about-icon img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        a {
+            color: var(--vert-principal);
+            text-decoration: none;
+        }
+
+        button, input, textarea {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--vert-principal);
+            background-color: var(--gris-fonce);
+            color: var(--gris-clair);
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--gris-fonce);
+            margin-top: 2rem;
+        }
+
+        /* Contact icons */
+        .contact-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--gris-fonce);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: 2px solid var(--vert-principal);
+        }
+
+        .contact-icon:hover {
+            transform: scale(1.1);
+            background-color: var(--vert-principal);
+        }
+
+        .contact-icon img {
+            width: 60%;
+            height: 60%;
+            object-fit: contain;
+            filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%);
+        }
+
+        .contact-icon:hover img {
+            filter: invert(9%) sepia(13%) saturate(1243%) hue-rotate(91deg) brightness(94%) contrast(91%);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            nav {
+                margin-top: 0.5rem;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .language-switcher {
+                margin: 0.5rem 0 0 0;
+            }
+
+            .projets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-container {
+                flex-direction: column;
+            }
+
+            .contact-icons {
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                gap: 0.5rem;
+            }
+            
+            nav a {
+                font-size: 0.9rem;
+                padding: 0.3rem 0;
+            }
+            
+            .profile-pic {
+                width: 40px;
+                height: 40px;
+            }
+
+            .contact-icons {
+                gap: 1rem;
+            }
+
+            .contact-icon {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        /* Language switching */
+        .lang-en {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTNycHdpbHdlNzJpMHZrMW9zcHlhejAxOWF1aXl4ZnR1b3V6Zzg0byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohjVcFJg92HXsVppS/giphy.gif" alt="Profile" class="profile-pic">
+            <h1 class="lang-fr">VuyCharles</h1>
+            <h1 class="lang-en">VuyCharles</h1>
+        </div>
+        <nav>
+            <a href="#accueil" class="lang-fr">Accueil</a>
+            <a href="#accueil" class="lang-en">Home</a>
+            <a href="#projets" class="lang-fr">Projets</a>
+            <a href="#projets" class="lang-en">Projects</a>
+            <a href="#projets-academiques" class="lang-fr">Projets Académiques</a>
+            <a href="#projets-academiques" class="lang-en">Academic Projects</a>
+            <a href="#blog" class="lang-fr">Blog</a>
+            <a href="#blog" class="lang-en">Blog</a>
+            <a href="#about" class="lang-fr">À propos</a>
+            <a href="#about" class="lang-en">About</a>
+            <a href="#skills" class="lang-fr">Compétences</a>
+            <a href="#skills" class="lang-en">Skills</a>
+            <a href="#contact" class="lang-fr">Contact</a>
+            <a href="#contact" class="lang-en">Contact</a>
+            <button class="language-switcher" onclick="toggleLanguage()">EN/FR</button>
+        </nav>
+    </header>
+    <main>
+        <section id="accueil">
+            <h2 class="lang-fr">MaxiKiffeur</h2>
+            <h2 class="lang-en">MaxiEnthusiast</h2>
+            <p class="lang-fr">Je bidouille des projets informatiques, et j'aime bien les maths. Je donne aussi des cours de Mathématiques / Physique / Informatique pour bac-3 à bac+1.</p>
+            <p class="lang-en">I tinker with IT projects, and I really like math. I also teach Mathematics / Physics / Computer Science for students from bac-3 to bac+1.</p>
+        </section>
+
+        <section id="projets">
+            <h2 class="lang-fr">Mes Projets</h2>
+            <h2 class="lang-en">My Projects</h2>
+            <div class="projets-grid">
+                <article class="projet">
+                    <h3 class="lang-fr">Solver de Labyrinthe</h3>
+                    <h3 class="lang-en">Maze Solver</h3>
+                    <p class="lang-fr">Application Java pour résoudre des labyrinthes.</p>
+                    <p class="lang-en">Java application to solve mazes.</p>
+                    <a href="labyrinthe-game.html" class="lang-fr">Voir plus</a>
+                    <a href="labyrinthe-game.html" class="lang-en">See more</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="projets-academiques">
+            <h2 class="lang-fr">Projets Académiques</h2>
+            <h2 class="lang-en">Academic Projects</h2>
+            <div class="projets-grid">
+                <article class="projet">
+                    <h3 class="lang-fr">TIPE 2025</h3>
+                    <h3 class="lang-en">TIPE 2025</h3>
+                    <p class="lang-fr">Accordeur de guitare électronique avec filtres passe-bande.</p>
+                    <p class="lang-en">Electronic guitar tuner with bandpass filters.</p>
+                    <a href="tipe.html" class="lang-fr">Voir plus</a>
+                    <a href="tipe.html" class="lang-en">See more</a>
+                </article>
+                <article class="projet">
+                    <h3 class="lang-fr">Comparaison Hyperbolique/Euclidien</h3>
+                    <h3 class="lang-en">Hyperbolic/Euclidean Comparison</h3>
+                    <p class="lang-fr">Visualisation des deux géométries en java.</p>
+                    <p class="lang-en">Visualization of the two geometries in Java.</p>
+                    <a href="hyperbolic-game.html" class="lang-fr">Voir plus</a>
+                    <a href="hyperbolic-game.html" class="lang-en">See more</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="blog">
+            <h2 class="lang-fr">Articles Récents</h2>
+            <h2 class="lang-en">Recent Articles</h2>
+            <article class="article">
+                <h3>TIPE 2025</h3>
+                <p class="lang-fr">Comment accorder une corde de guitare avec des filtres ...</p>
+                <p class="lang-en">How to tune a guitar string with filters ...</p>
+                <a href="tipe.html" class="lang-fr">Lire la suite</a>
+                <a href="tipe.html" class="lang-en">Read more</a>
+            </article>
+        </section>
+
+        <section id="about">
+            <h2 class="lang-fr">À propos de moi</h2>
+            <h2 class="lang-en">About Me</h2>
+            <div class="about-container">
+                <div class="about-card">
+                    <div class="about-icon">
+                        <img src="https://cdn.discordapp.com/icons/1254685345078054943/15ae0d0d0d742bef703cf3ed59abe5b8.png?size=128" alt="Lycée Thiers">
+                    </div>
+                    <div>
+                        <strong class="lang-fr">Prépa MPII / MPI</strong>
+                        <strong class="lang-en">MPII / MPI Preparatory Class</strong><br>
+                        <span class="lang-fr">Lycée Thiers, Marseille</span>
+                        <span class="lang-en">Thiers High School, Marseille</span><br>
+                        2022 - 2025
+                    </div>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSU8V8ZKCUsSwZCmEsdf3-pkCRNPlMdqWCYGQ&s" alt="ENAC">
+                    </div>
+                    <div>
+                        <strong class="lang-fr">Étudiant Contrôleur aérien</strong>
+                        <strong class="lang-en">Air Traffic Controller Student</strong><br>
+                        <span class="lang-fr">ENAC, Toulouse</span>
+                        <span class="lang-en">ENAC, Toulouse</span><br>
+                        2025 - 202x
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2 class="lang-fr">Contact</h2>
+            <h2 class="lang-en">Contact</h2>
+            <div class="contact-icons">
+                <a href="mailto:vuycharles@icloud.com" class="contact-icon" title="Email">
+                    <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Email">
+                </a>
+                <a href="https://github.com/vuycharles" target="_blank" class="contact-icon" title="GitHub">
+                    <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub">
+                </a>
+                <a href="https://instagram.com/charles.vcs" target="_blank" class="contact-icon" title="Instagram">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <!-- <p class="lang-fr">© 2023 Portfolio Minimaliste. Tous droits réservés.</p>
+        <p class="lang-en">© 2023 Minimalist Portfolio. All rights reserved.</p> -->
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            <a href="#" style="color: var(--vert-principal);" class="lang-fr">Mentions légales</a>
+            <a href="#" style="color: var(--vert-principal);" class="lang-en">Legal notice</a> | 
+            <a href="#" style="color: var(--vert-principal);">LinkedIn</a> | 
+            <a href="https://github.com/VUYCharles" style="color: var(--vert-principal);">GitHub</a>
+        </p>
+    </footer>
+
+    <script>
+        function toggleLanguage() {
+            const frElements = document.querySelectorAll('.lang-fr');
+            const enElements = document.querySelectorAll('.lang-en');
+            
+            frElements.forEach(el => {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            enElements.forEach(el => {
+                el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        // Initialize with French visible and English hidden
+        document.addEventListener('DOMContentLoaded', function() {
+            const enElements = document.querySelectorAll('.lang-en');
+            enElements.forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

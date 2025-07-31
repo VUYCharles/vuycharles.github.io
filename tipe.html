@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIPE 2025</title>
+    <style>
+        :root {
+            --vert-principal: #2ecc71;
+            --vert-fonce: #27ae60;
+            --noir: #121212;
+            --gris-fonce: #1e1e1e;
+            --gris-clair: #f5f5f5;
+            --blanc: #ffffff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--gris-clair);
+            background-color: var(--noir);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--gris-fonce);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--vert-principal);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--gris-clair);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--vert-principal);
+        }
+
+        .language-switcher {
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .language-switcher:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        .article-content {
+            background-color: var(--gris-fonce);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .powerpoint-container {
+            background-color: var(--gris-fonce);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .powerpoint-container iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--vert-principal);
+            color: var(--noir);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .download-link:hover {
+            background-color: var(--vert-fonce);
+        }
+
+        .difficulty {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid var(--vert-principal);
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--gris-fonce);
+            margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav {
+                margin-top: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .powerpoint-container iframe {
+                height: 300px;
+            }
+        }
+
+        /* Language switching */
+        .lang-en {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="lang-fr">Mon TIPE</h1>
+        <h1 class="lang-en">My TIPE Project</h1>
+        <nav>
+            <a href="test1.html" class="lang-fr">← Retour au portfolio</a>
+            <a href="test1.html" class="lang-en">← Back to portfolio</a>
+            <button class="language-switcher" onclick="toggleLanguage()">EN/FR</button>
+        </nav>
+    </header>
+
+    <main>
+        <article class="article-content">
+            <h2 class="lang-fr">Accordeur de guitare</h2>
+            <h2 class="lang-en">Guitar Tuner</h2>
+            <p class="article-meta lang-fr">Publié le <time datetime="2023-05-15">15 mai 2023</time></p>
+            <p class="article-meta lang-en">Published on <time datetime="2023-05-15">May 15, 2023</time></p>
+            
+            <section>
+                <h3 class="lang-fr">Introduction</h3>
+                <h3 class="lang-en">Introduction</h3>
+                <p class="lang-fr">Dans cet article, je présente en détail mon Travail d'Initiative Personnelle Encadré (TIPE) que j'ai réalisé durant mon année de spé. Vous trouverez ci-dessous la présentation PowerPoint complète, suivie d'une explication détaillée de ma démarche.</p>
+                <p class="lang-en">In this article, I present in detail my Supervised Personal Initiative Work (TIPE) that I carried out during my preparatory year. Below you'll find the complete PowerPoint presentation, followed by a detailed explanation of my approach.</p>
+            </section>
+
+            <div class="powerpoint-container">
+                <h3 class="lang-fr">Présentation PowerPoint</h3>
+                <h3 class="lang-en">PowerPoint Presentation</h3>
+                <iframe src="tipe.pdf" allowfullscreen></iframe>
+                <div>
+                    <a href="tipe.pdf" class="download-link lang-fr">Télécharger le PDF</a>
+                    <a href="tipe.pdf" class="download-link lang-en">Download PDF</a>
+                </div>
+            </div>
+
+            <section>
+                <h3 class="lang-fr">Genèse du projet</h3>
+                <h3 class="lang-en">Project Genesis</h3>
+                <p class="lang-fr">L'idée de ce TIPE m'est venue quand je voulais accorder ma guitare et que mon accordeur n'avait plus de batterie. On étudiait les filtres en physique et j'ai fait le lien avec les filtres passe bandes. Étant donné les cas d'application qu'on avait vu en TP, je me suis dit naïvement qu'en branchant un filtre passe bande et un comparateur en série, je pouvais construire un accordeur.</p>
+                <p class="lang-en">The idea for this TIPE came to me when I wanted to tune my guitar and my tuner ran out of battery. We were studying filters in physics and I made the connection with bandpass filters. Given the application cases we had seen in practical work, I naively thought that by connecting a bandpass filter and a comparator in series, I could build a tuner.</p>
+
+                <p class="lang-fr">Le choix du sujet s'est fait progressivement. Initialement, je minimisais la difficulté de réalisation pratique d'un accordeur donc j'envisageais de construire un accordeur qui reconnaissait toutes les 6 cordes de la guitare, sélectionnait automatiquement celle jouée et indiquait par des leds si la note jouait était fausse ou juste. Mais après discussion avec mon encadrant et quelques tentatives préliminaires, j'ai réalisé que la construction d'un filtre passe bande adapté à la guitare était un défi technique plus complexe que prévu.</p>
+                <p class="lang-en">The choice of subject was made gradually. Initially, I underestimated the practical difficulty of building a tuner, so I considered building a tuner that would recognize all 6 guitar strings, automatically select the one being played, and indicate with LEDs whether the note played was wrong or correct. But after discussion with my supervisor and some preliminary attempts, I realized that building a bandpass filter adapted to the guitar was a more complex technical challenge than expected.</p>
+
+                <p class="lang-fr">De plus la notion de justesse me semblait évidente, mais elle s'est avérée plus complexe à définir et à mesurer. J'ai dû me plonger dans des recherches sur la théorie musicale et les techniques d'accordage pour mieux comprendre les enjeux.</p>
+                <p class="lang-en">Moreover, the notion of pitch accuracy seemed obvious to me, but it turned out to be more complex to define and measure. I had to immerse myself in research on music theory and tuning techniques to better understand the issues.</p>
+            </section>
+
+            <section>
+                <h3 class="lang-fr">Méthodologie et réalisation</h3>
+                <h3 class="lang-en">Methodology and Implementation</h3>
+                <p class="lang-fr">Pour mener à bien ce TIPE, j'ai adopté la démarche suivante :</p>
+                <p class="lang-en">To successfully complete this TIPE, I adopted the following approach:</p>
+                
+                <h4 class="lang-fr">1. Recherche bibliographique</h4>
+                <h4 class="lang-en">1. Bibliographic Research</h4>
+                <p class="lang-fr">J'ai, grâce à une superbe cotisation à l'amu, eu accès à de nombreuses ressources en ligne, notamment des articles scientifiques et des thèses. Cela m'a permis de mieux comprendre les concepts de base liés aux filtres et à l'accordage. Google scholar aussi a bien aidé à mettre la main sur des études pertinentes, et zlib m'a permis d'avoir accès à des livres d'apprentissages sur la théorie des filtres.</p>
+                <p class="lang-en">Thanks to a great subscription at AMU, I had access to many online resources, including scientific articles and theses. This allowed me to better understand the basic concepts related to filters and tuning. Google Scholar also helped find relevant studies, and zlib gave me access to learning books on filter theory.</p>
+
+                <div class="difficulty">
+                    <h4 class="lang-fr">Difficulté rencontrée : le manque de transparence dans les études utilisées</h4>
+                    <h4 class="lang-en">Difficulty encountered: Lack of transparency in used studies</h4>
+                    <p class="lang-fr">Dans une des études que j'avais utilisé, qui était un devoir d'étudiant en master à la sorbonne, des données et des valeurs de composants étaient incohérentes et aboutissaient à des déphasages anormaux.</p>
+                    <p class="lang-en">In one of the studies I used, which was a master's student assignment at Sorbonne, data and component values were inconsistent and resulted in abnormal phase shifts.</p>
+                    <p class="lang-fr"><strong>Solution apportée :</strong> J'ai contacté l'auteur de l'étude pour clarifier certains points et j'ai également cherché des études complémentaires pour corroborer les données.</p>
+                    <p class="lang-en"><strong>Solution implemented:</strong> I contacted the study author to clarify some points and also looked for complementary studies to corroborate the data.</p>
+                </div>
+                
+                <h4 class="lang-fr">2. Expérimentation/prototypage</h4>
+                <h4 class="lang-en">2. Experimentation/Prototyping</h4>
+                <p class="lang-fr">La partie pratique a consisté en aller/retours entre l'étude théorique pour améliorer mon filtre, simulation informatique (avec python et matlab) pour prédire si la réalisation pratique allait rencontrer un problème corrigeable en amont ou pour prédire des mauvaises compréhensions de la théorie.</p>
+                <p class="lang-en">The practical part consisted of back-and-forth between theoretical study to improve my filter, computer simulation (with Python and MATLAB) to predict whether the practical implementation would encounter a correctable problem upstream or to predict misunderstandings of the theory.</p>
+                
+                <div class="difficulty">
+                    <h4 class="lang-fr">Difficulté rencontrée : La réalisation pratique d'un filtre</h4>
+                    <h4 class="lang-en">Difficulty encountered: Practical implementation of a filter</h4>
+                    <p class="lang-fr">Lors de construction, j'ai découvert à quel point il était compliqué de sélectionner les composants et à quel point il fallait revérifier régulièrement chacun des composants.</p>
+                    <p class="lang-en">During construction, I discovered how complicated it was to select components and how important it was to regularly recheck each component.</p>
+                    <p class="lang-fr"><strong>Solution apportée :</strong> Séparer le filtre en plusieurs sous-filtres, raccorder par des AOP en mode suiveur ou amplificateur.</p>
+                    <p class="lang-en"><strong>Solution implemented:</strong> Separate the filter into several sub-filters, connected by op-amps in follower or amplifier mode.</p>
+                </div>
+                
+                <h4 class="lang-fr">3. Analyse des résultats</h4>
+                <h4 class="lang-en">3. Results Analysis</h4>
+                <p class="lang-fr">Les données recueillies étaient cohérentes et pertinentes mais les contraintes du TIPE -pas de vidéo autorisée, que des graph- ne permettaient pas de restituer clairement les données. J'ai donc utilisé des graphiques et des visualisations pour présenter mes résultats de manière plus claire et impactante.</p>
+                <p class="lang-en">The collected data was consistent and relevant but the TIPE constraints -no video allowed, only graphs- didn't allow to clearly present the data. So I used graphs and visualizations to present my results more clearly and impactfully.</p>
+            </section>
+
+            <section>
+                <h3 class="lang-fr">Bilan et perspectives</h3>
+                <h3 class="lang-en">Assessment and Perspectives</h3>
+                <p class="lang-fr">Ce TIPE m'a permis de me heurter aux difficultés de la réalisation pratique et à confronter mes certitudes théoriques:</p>
+                <p class="lang-en">This TIPE allowed me to face the difficulties of practical implementation and confront my theoretical certainties:</p>
+                <ul>
+                    <li class="lang-fr">Difficulté de la réalisation pratique : rigueur dans le câblage</li>
+                    <li class="lang-en">Practical implementation difficulty: rigor in wiring</li>
+                    <li class="lang-fr">Difficulté de l'analyse critique : remise en question des sources</li>
+                    <li class="lang-en">Critical analysis difficulty: questioning sources</li>
+                    <li class="lang-fr">Difficulté de la gestion de projet : planification et respect des délais</li>
+                    <li class="lang-en">Project management difficulty: planning and meeting deadlines</li>
+                </ul>
+                
+                <p class="lang-fr">Si c'était à refaire, je chercherais à contrer les déphasages que les boucles de rétroactions induisent, car après consultation avec le jury de l'épreuve, le déphasage généré par ces AOP rendent l'évaluation de la justesse trop imprécise.</p>
+                <p class="lang-en">If I were to do it again, I would try to counter the phase shifts induced by feedback loops, because after consultation with the jury, the phase shift generated by these op-amps makes the pitch accuracy evaluation too imprecise.</p>
+                
+                <p class="lang-fr">Ce travail pourrait aussi s'ouvrir à de nouvelles pistes de définition de la justesse. Ma considération se borne à la définition occidentale de la monochromie, mais de nombreux instruments sont basés sur des systèmes multichromiques, comme l'harmonica en dichromatique. Concrètement, on distinguerait le Mi bémol et le Ré dièse, ce qui n'est pas le cas en monochromatique.</p>
+                <p class="lang-en">This work could also open up new avenues for defining pitch accuracy. My consideration is limited to the Western definition of monochromatism, but many instruments are based on multichromatic systems, like the dichromatic harmonica. Specifically, we would distinguish between E flat and D sharp, which is not the case in monochromatic.</p>
+            </section>
+
+            <section>
+                <h3 class="lang-fr">Conclusion</h3>
+                <h3 class="lang-en">Conclusion</h3>
+                <p class="lang-fr">Ce TIPE a été une expérience extrêmement formatrice qui a confirmé mon intérêt pour la physique ondulatoire, et l'utilisation d'outil informatique à son service. Au-delà des connaissances académiques, il m'a appris la rigueur nécessaire pour mener à bien un projet dépendant de composants électroniques. Je remercie particulièrement le personnel de laboratoire de Thiers, ainsi que le corps enseignant de physique pour leur aide précieuse.</p>
+                <p class="lang-en">This TIPE was an extremely formative experience that confirmed my interest in wave physics and the use of computer tools to serve it. Beyond academic knowledge, it taught me the rigor needed to successfully complete a project dependent on electronic components. I particularly thank the laboratory staff in Thiers, as well as the physics teaching staff for their valuable help.</p>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p class="lang-fr">© 2023 Mon Portfolio. Tous droits réservés.</p>
+        <p class="lang-en">© 2023 My Portfolio. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleLanguage() {
+            const frElements = document.querySelectorAll('.lang-fr');
+            const enElements = document.querySelectorAll('.lang-en');
+            
+            frElements.forEach(el => {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            enElements.forEach(el => {
+                el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+
+        // Initialize with French visible and English hidden
+        document.addEventListener('DOMContentLoaded', function() {
+            const enElements = document.querySelectorAll('.lang-en');
+            enElements.forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
