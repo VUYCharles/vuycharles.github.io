@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>InfoTrafficGuesser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Commit+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- Mode clair (défaut) --- */
+            --fond: #F2F5F4;
+            --carte: #E4EBE8;
+            --carte-survol: #F8FAFA;
+            --texte: #1E2D3A;
+            --brume: #8A9CA8;
+            --accent: #A4C4B4;
+            --secondaire: #A4B8CC;
+            --survol: #D4A89A;
+            --ombre-carte: 0 2px 8px rgba(30, 45, 58, 0.04);
+            --focus: #A4C4B4;
+            /* --- Typographie & layout --- */
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Commit Mono', monospace;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --fond: #131820;
+                --carte: #1A2130;
+                --carte-survol: #222C3A;
+                --texte: #E0E6E4;
+                --brume: #6E7E8A;
+                --accent: #B0A4C8;
+                --secondaire: #C8A0B0;
+                --survol: #D4A0B4;
+                --ombre-carte: 0 2px 8px rgba(0, 0, 0, 0.2);
+                --focus: #B0A4C8;
+            }
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+        html { scroll-behavior: auto; }
+
+        body {
+            font-family: var(--font-sans);
+            font-weight: 400;
+            background-color: var(--fond);
+            color: var(--texte);
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            display: flex; justify-content: center;
+            line-height: 1.5;
+        }
+
+        a { color: inherit; text-decoration: none; transition: none; }
+        a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 2px;
+        }
+
+        /* --- PANNEAU FLOTTANT --- */
+        #ui-overlay {
+            position: absolute; top: 20px; left: 20px;
+            width: 340px;
+            max-height: calc(100vh - 40px);
+            background: var(--carte-survol);
+            border-radius: 8px;
+            box-shadow: var(--ombre-carte);
+            z-index: 1000;
+            display: flex; flex-direction: column;
+            transition: none;
+            overflow: hidden;
+        }
+
+        #ui-overlay.collapsed #ui-content { display: none; }
+
+        #ui-header-bar {
+            display: flex; flex-direction: column;
+            padding: 20px 24px 16px 24px;
+        }
+
+        .back-link {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+        .back-link:hover { color: var(--survol); }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        .header-titles h1 { font-size: 22px; font-weight: 500; color: var(--texte); }
+        .credits { font-family: var(--font-mono); font-size: 12px; color: var(--brume); margin-top: 4px; }
+
+        #toggleMenuBtn {
+            background: var(--accent); color: var(--carte-survol);
+            border: none; width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; font-size: 14px; flex-shrink: 0;
+            transition: none;
+        }
+        #toggleMenuBtn:hover { background: var(--survol); }
+
+        #ui-content { padding: 0 24px 24px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+
+        /* Contrôles */
+        .controls { display: flex; flex-direction: column; gap: 12px; }
+        label {
+            font-family: var(--font-mono); font-size: 13px; color: var(--brume);
+        }
+
+        .checkbox-group {
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            padding: 12px; background: var(--carte); border-radius: 8px;
+            font-family: var(--font-mono); font-size: 13px; color: var(--texte);
+        }
+
+        select, input[type="number"] {
+            width: 100%; padding: 12px;
+            background: var(--carte-survol);
+            border: 1px solid var(--carte);
+            color: var(--texte);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .button-group { display: flex; gap: 10px; margin-top: 4px; }
+        button.action-btn {
+            border: none; padding: 14px; border-radius: 8px;
+            font-family: var(--font-sans); font-weight: 500; font-size: 15px;
+            cursor: pointer; color: var(--carte-survol);
+            transition: none;
+        }
+        .btn-play { background-color: var(--accent); flex-grow: 1; }
+        .btn-play:hover { background-color: var(--survol); }
+        .btn-clear { background-color: var(--texte); width: 48px; }
+        .btn-clear:hover { background-color: var(--survol); }
+
+        /* --- LISTE DES VOLS --- */
+        #trafficListContainer { background: var(--carte); border-radius: 8px; padding: 16px; }
+        #trafficList { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+        #trafficList li {
+            background: var(--carte-survol); padding: 10px 12px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; font-family: var(--font-mono); font-size: 13px; color: var(--texte);
+        }
+        .transit-badge {
+            background-color: var(--texte); color: var(--carte-survol);
+            font-family: var(--font-mono); font-size: 11px;
+            padding: 2px 6px; border-radius: 4px; margin-left: 8px;
+        }
+
+        /* --- ZONE DE CARTE --- */
+        #map-area {
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        #map-container {
+            position: relative;
+            width: 850px;
+            margin: 40px auto;
+            box-shadow: var(--ombre-carte);
+            border-radius: 8px;
+            background-color: var(--carte-survol);
+        }
+
+        #map-bg {
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        /* --- AVIONS --- */
+        .plane {
+            position: absolute; width: 120px; height: 120px;
+            margin-left: -60px; margin-top: -60px;
+            cursor: crosshair;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            user-select: none;
+            transition: none;
+        }
+        .plane-icon { width: 100px; height: 100px; }
+        .plane-label {
+            background: var(--carte-survol); color: var(--texte);
+            font-family: var(--font-mono); font-size: 14px; font-weight: 400;
+            padding: 4px 10px; border-radius: 4px;
+            border: 1px solid var(--carte);
+            margin-top: -4px; pointer-events: none;
+            box-shadow: var(--ombre-carte);
+        }
+
+        @media (max-width: 768px) {
+            #ui-overlay { width: calc(100% - 20px); top: 10px; left: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-overlay">
+        <div id="ui-header-bar">
+            <a href="#" class="back-link">← Tous les projets</a>
+            <div class="header-row">
+                <div class="header-titles">
+                    <h1>InfoTrafficGuesser</h1>
+                    <div class="credits">By @vuycharles | MCTA25C</div>
+                </div>
+                <button id="toggleMenuBtn">▲</button>
+            </div>
+        </div>
+
+        <div id="ui-content">
+            <div class="controls">
+                <label>Carte active</label>
+                <select id="mapSelect">
+                    <option value="grande_carte.png">Approche à vue (Globale)</option>
+                    <option value="petite_carte.png">Atterrissage & Sol (Détaillée)</option>
+                </select>
+
+                <label>Nombre d'avions (hors transit)</label>
+                <input type="number" id="planeCount" min="1" max="20" value="4">
+
+                <label class="checkbox-group">
+                    <input type="checkbox" id="chkTransit" checked> Générer un vol transit
+                </label>
+
+                <div class="button-group">
+                    <button id="btnGenerate" class="action-btn btn-play">Générer scénario</button>
+                    <button id="btnClear" class="action-btn btn-clear">🗑</button>
+                </div>
+            </div>
+
+            <div id="trafficListContainer" style="display: none;">
+                <label>Suivi</label>
+                <ul id="trafficList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZONE DE LA CARTE -->
+    <div id="map-area">
+        <div id="map-container">
+            <img id="map-bg" src="grande_carte.png" alt="Carte VAC">
+        </div>
+    </div>
+
+    <script>
+        const uiOverlay = document.getElementById('ui-overlay');
+        const toggleMenuBtn = document.getElementById('toggleMenuBtn');
+        toggleMenuBtn.addEventListener('click', () => {
+            const collapsed = uiOverlay.classList.toggle('collapsed');
+            toggleMenuBtn.innerText = collapsed ? '▼' : '▲';
+        });
+
+        // --- GÉNÉRATEUR ---
+        function generateCallsign() {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let callsign = "F-";
+            for (let i = 0; i < 2; i++) callsign += letters.charAt(Math.floor(Math.random() * letters.length));
+            return callsign;
+        }
+
+        function isDarkMode() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        const btnGenerate = document.getElementById('btnGenerate');
+        const btnClear = document.getElementById('btnClear');
+        const trafficList = document.getElementById('trafficList');
+        const mapContainer = document.getElementById('map-container');
+        const mapBg = document.getElementById('map-bg');
+
+        btnClear.addEventListener('click', () => {
+            document.querySelectorAll('.plane').forEach(p => p.remove());
+            trafficList.innerHTML = '';
+            document.getElementById('trafficListContainer').style.display = 'none';
+        });
+
+        // Fonction de création d'avion
+        function createPlane(isTransit, posX, posY, heading) {
+            const plane = document.createElement('div');
+            plane.className = 'plane';
+            plane.style.left = `${posX}px`;
+            plane.style.top = `${posY}px`;
+
+            const callsign = generateCallsign();
+            const dark = isDarkMode();
+            const planeColor = isTransit ? (dark ? '#E0E6E4' : '#1E2D3A') : (dark ? '#B0A4C8' : '#A4C4B4');
+            const strokeColor = dark ? '#131820' : '#F8FAFA';
+
+            plane.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="${planeColor}" class="plane-icon" style="transform: rotate(${heading}deg)">
+                    <path d="M21,16V14L13,9V3.5A1.5,1.5 0 0,0 11.5,2A1.5,1.5 0 0,0 10,3.5V9L2,14V16L10,13.5V19L8,20.5V22L11.5,21L15,22V20.5L13,19V13.5L21,16Z" stroke="${strokeColor}" stroke-width="1.5" />
+                </svg>
+                <div class="plane-label">${callsign}</div>
+            `;
+
+            mapContainer.appendChild(plane);
+
+            const li = document.createElement('li');
+            li.innerHTML = `${callsign} ${isTransit ? '<span class="transit-badge">TRANSIT</span>' : ''}`;
+            li.onclick = () => plane.scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});
+            trafficList.appendChild(li);
+        }
+
+        btnGenerate.addEventListener('click', () => {
+            document.querySelectorAll('.plane').forEach(p => p.remove());
+            trafficList.innerHTML = '';
+
+            const count = parseInt(document.getElementById('planeCount').value) || 1;
+            const includeTransit = document.getElementById('chkTransit').checked;
+
+            const maxX = 850;
+            const maxY = mapBg.clientHeight > 0 ? mapBg.clientHeight : 1150;
+
+            document.getElementById('trafficListContainer').style.display = 'block';
+
+            for (let i = 0; i < count; i++) {
+                const posX = Math.floor(Math.random() * (maxX - 150)) + 75;
+                const posY = Math.floor(Math.random() * (maxY - 150)) + 75;
+                const heading = Math.floor(Math.random() * 360);
+
+                createPlane(false, posX, posY, heading);
+            }
+
+            if (includeTransit) {
+                const transitX = 425;
+                const transitY = Math.floor(Math.random() * (maxY - 200)) + 100;
+                const transitHeading = Math.random() > 0.5 ? 0 : 180;
+
+                createPlane(true, transitX, transitY, transitHeading);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Vuycharles — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Commit+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/horizon.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Navigation -->
+    <nav class="nav-bar" aria-label="Navigation principale">
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Projets</a></li>
+        <li><a href="mcta.html">MCTA</a></li>
+        <li><a href="a-propos.html">À propos</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- Header avec filigrane -->
+      <header class="header-reflets">
+        <svg class="reflets-svg" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <line x1="0" y1="140" x2="1200" y2="140" stroke="var(--secondaire)" stroke-width="1" vector-effect="non-scaling-stroke" />
+          <line x1="200" y1="200" x2="900" y2="200" stroke="var(--secondaire)" stroke-width="1" vector-effect="non-scaling-stroke" />
+          <line x1="100" y1="260" x2="700" y2="260" stroke="var(--secondaire)" stroke-width="1" vector-effect="non-scaling-stroke" />
+          <line x1="350" y1="320" x2="1100" y2="320" stroke="var(--secondaire)" stroke-width="1" vector-effect="non-scaling-stroke" />
+        </svg>
+        <div class="header-content">
+          <h1>Vuycharles</h1>
+          <p class="baseline">Bidouilleur</p>
+        </div>
+      </header>
+
+      <!-- Grille projets personnels -->
+      <section aria-label="Projets personnels">
+        <div class="projects-grid" id="grid-perso"></div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-line"></div>
+      <div class="footer-line"></div>
+      <div class="footer-content">
+        <span>© 2026 — Vuycharles</span>
+        <a href="contact.html">Contact</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/projects.js"></script>
+  <script src="js/router.js"></script>
+</body>
+</html>

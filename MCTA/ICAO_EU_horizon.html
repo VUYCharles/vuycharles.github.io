@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geo Europe : Aéroports — Horizon</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Commit+Mono&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* --- Mode clair (défaut) --- */
+    --fond: #F2F5F4;
+    --carte: #E4EBE8;
+    --carte-survol: #F8FAFA;
+    --texte: #1E2D3A;
+    --brume: #8A9CA8;
+    --accent: #A4C4B4;
+    --secondaire: #A4B8CC;
+    --survol: #D4A89A;
+    --ombre-carte: 0 2px 8px rgba(30, 45, 58, 0.04);
+    --focus: #A4C4B4;
+    /* --- Typographie & layout --- */
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'Commit Mono', monospace;
+    --padding-page: 40px;
+    --max-width: 1100px;
+    --gap-grid: 24px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fond: #131820;
+      --carte: #1A2130;
+      --carte-survol: #222C3A;
+      --texte: #E0E6E4;
+      --brume: #6E7E8A;
+      --accent: #B0A4C8;
+      --secondaire: #C8A0B0;
+      --survol: #D4A0B4;
+      --ombre-carte: 0 2px 8px rgba(0, 0, 0, 0.2);
+      --focus: #B0A4C8;
+    }
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--fond);
+    color: var(--texte);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: none;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+  }
+
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+    padding-left: var(--padding-page);
+    padding-right: var(--padding-page);
+  }
+
+  /* --- Barre de retour --- */
+  .topbar {
+    padding-top: 48px;
+    padding-bottom: 32px;
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .back-link:hover {
+    color: var(--survol);
+  }
+
+  /* --- En-tête projet --- */
+  .project-header {
+    padding-bottom: 40px;
+  }
+
+  .project-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 40px;
+    color: var(--texte);
+    max-width: 700px;
+  }
+
+  .project-meta {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--brume);
+    margin-top: 16px;
+  }
+
+  /* --- Zone applicative (sidebar + carte) --- */
+  .app {
+    display: flex;
+    height: 640px;
+    max-width: var(--max-width);
+    margin: 0 auto 80px auto;
+    width: calc(100% - 2 * var(--padding-page));
+    box-shadow: var(--ombre-carte);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    background-color: var(--carte-survol);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #map {
+    flex-grow: 1;
+    height: 100%;
+  }
+
+  .score-board {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--brume);
+    margin-bottom: 24px;
+  }
+
+  .score-board span {
+    color: var(--texte);
+  }
+
+  .instruction {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--texte);
+    background-color: var(--carte);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  #target-icao {
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 32px;
+    color: var(--texte);
+    letter-spacing: 2px;
+    margin-top: 12px;
+  }
+
+  #feedback {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--brume);
+    min-height: 64px;
+    margin-bottom: 16px;
+  }
+
+  #feedback.correct { color: var(--accent); }
+  #feedback.incorrect { color: var(--texte); }
+
+  button {
+    padding: 14px;
+    background-color: var(--accent);
+    color: var(--carte-survol);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: auto;
+    transition: none;
+  }
+
+  button:hover:not(:disabled) {
+    background-color: var(--survol);
+  }
+
+  button:disabled {
+    background-color: var(--brume);
+    cursor: not-allowed;
+  }
+
+  /* Marqueurs Leaflet recolorés selon la palette */
+  .marker-target {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    border: 2px solid var(--carte-survol);
+  }
+
+  .marker-user {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--texte);
+    border: 2px solid var(--carte-survol);
+  }
+
+  .leaflet-popup-content-wrapper {
+    background-color: var(--carte-survol);
+    color: var(--texte);
+    font-family: var(--font-mono);
+    border-radius: 8px;
+    box-shadow: var(--ombre-carte);
+  }
+
+  .leaflet-popup-tip {
+    background-color: var(--carte-survol);
+  }
+
+  /* --- Footer double filet --- */
+  footer {
+    padding-top: 100px;
+    padding-bottom: 40px;
+    margin-top: auto;
+  }
+
+  .footer-line {
+    width: 40px;
+    height: 1px;
+    background-color: var(--secondaire);
+    margin-bottom: 4px;
+  }
+
+  .footer-line:last-of-type {
+    margin-bottom: 24px;
+  }
+
+  .footer-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .footer-content span,
+  .footer-content a {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--brume);
+  }
+
+  .footer-content a:hover {
+    color: var(--survol);
+  }
+
+  @media (max-width: 768px) {
+    .container { padding-left: 24px; padding-right: 24px; }
+    .topbar { padding-top: 24px; padding-bottom: 24px; }
+    .project-title { font-size: 32px; }
+    .project-meta { font-size: 12px; }
+
+    .app {
+      flex-direction: column;
+      height: auto;
+      width: calc(100% - 48px);
+      margin-bottom: 48px;
+    }
+
+    #sidebar { width: 100%; padding: 24px; }
+    #map { height: 50vh; }
+    #target-icao { font-size: 26px; }
+
+    footer { padding-top: 48px; padding-bottom: 24px; }
+    .footer-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar container">
+    <a href="#" class="back-link">← Tous les projets</a>
+  </div>
+
+  <div class="project-header container">
+    <h1 class="project-title">Geo Europe : Aéroports</h1>
+    <div class="project-meta">outil • 2026 • en ligne</div>
+  </div>
+
+  <div class="app">
+    <div id="sidebar">
+      <div class="score-board">
+        Score : <span id="score">0</span> / <span id="rounds">0</span>
+      </div>
+
+      <div class="instruction">
+        Placez sur la carte l'aéroport :
+        <span id="target-icao">----</span>
+      </div>
+
+      <div id="feedback">Cliquez sur la carte pour placer l'aéroport. Si vous êtes à moins de 150 km, c'est gagné !</div>
+
+      <button id="next-btn" disabled onclick="nextRound()">Aéroport suivant</button>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <footer class="container">
+    <div class="footer-line"></div>
+    <div class="footer-line"></div>
+    <div class="footer-content">
+      <span>© 2026 — Prénom NOM</span>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    const airports = [
+        { icao: 'LEMD', name: 'Madrid', lat: 40.4719, lng: -3.5626 },
+        { icao: 'LEVC', name: 'Valence', lat: 39.4893, lng: -0.4816 },
+        { icao: 'LEBL', name: 'Barcelone', lat: 41.2971, lng: 2.0785 },
+        { icao: 'LEPA', name: 'Palma de Majorque', lat: 39.5517, lng: 2.7388 },
+        { icao: 'LEMG', name: 'Malaga', lat: 36.6749, lng: -4.4991 },
+        { icao: 'LEIB', name: 'Ibiza', lat: 38.8729, lng: 1.3731 },
+        { icao: 'LEBB', name: 'Bilbao', lat: 43.3011, lng: -2.9106 },
+        { icao: 'EGKK', name: 'Londres Gatwick', lat: 51.1481, lng: -0.1903 },
+        { icao: 'EGLL', name: 'Londres Heathrow', lat: 51.4700, lng: -0.4543 },
+        { icao: 'EGCC', name: 'Manchester', lat: 53.3537, lng: -2.2750 },
+        { icao: 'EGSS', name: 'Londres Stansted', lat: 51.8850, lng: 0.2350 },
+        { icao: 'LIML', name: 'Milan Linate', lat: 45.4451, lng: 9.2767 },
+        { icao: 'LIRF', name: 'Rome Fiumicino', lat: 41.7999, lng: 12.2462 },
+        { icao: 'LIPZ', name: 'Venise', lat: 45.5053, lng: 12.3519 },
+        { icao: 'LICJ', name: 'Palerme', lat: 38.1760, lng: 13.0910 },
+        { icao: 'EIDW', name: 'Dublin', lat: 53.4213, lng: -6.2701 },
+        { icao: 'ESSA', name: 'Stockholm', lat: 59.6519, lng: 17.9186 },
+        { icao: 'EBBR', name: 'Bruxelles', lat: 50.9014, lng: 4.4844 },
+        { icao: 'EPWA', name: 'Varsovie', lat: 52.1657, lng: 20.9671 },
+        { icao: 'LMML', name: 'Luqa (Malte)', lat: 35.8575, lng: 14.4775 },
+        { icao: 'LPPT', name: 'Lisbonne', lat: 38.7742, lng: -9.1342 },
+        { icao: 'LPPR', name: 'Porto', lat: 41.2356, lng: -8.6781 },
+        { icao: 'EFHK', name: 'Helsinki', lat: 60.3172, lng: 24.9633 },
+        { icao: 'ENGM', name: 'Oslo', lat: 60.1939, lng: 11.1004 },
+        { icao: 'LROP', name: 'Bucarest', lat: 44.5722, lng: 26.1022 },
+        { icao: 'EDDH', name: 'Hambourg', lat: 53.6304, lng: 9.9882 },
+        { icao: 'EDDF', name: 'Francfort', lat: 50.0333, lng: 8.5705 },
+        { icao: 'EDDM', name: 'Munich', lat: 48.3538, lng: 11.7861 },
+        { icao: 'EDDT', name: 'Berlin Tegel', lat: 52.5597, lng: 13.2877 },
+        { icao: 'EDDL', name: 'Dusseldorf', lat: 51.2895, lng: 6.7668 },
+        { icao: 'LTFM', name: 'Istanbul', lat: 41.2753, lng: 28.7519 },
+        { icao: 'EKCH', name: 'Copenhague', lat: 55.6179, lng: 12.6560 },
+        { icao: 'EHAM', name: 'Amsterdam', lat: 52.3086, lng: 4.7639 },
+        { icao: 'ELLX', name: 'Luxembourg', lat: 49.6266, lng: 6.2115 },
+        { icao: 'LSGG', name: 'Genève', lat: 46.2381, lng: 6.1089 },
+        { icao: 'LSZH', name: 'Zurich', lat: 47.4647, lng: 8.5492 },
+        { icao: 'LHBP', name: 'Budapest', lat: 47.4369, lng: 19.2375 },
+        { icao: 'LOWW', name: 'Vienne', lat: 48.1103, lng: 16.5697 },
+        { icao: 'LOWI', name: 'Innsbruck', lat: 47.2602, lng: 11.3440 },
+        { icao: 'LKPR', name: 'Prague', lat: 50.1008, lng: 14.2600 },
+        { icao: 'LGAV', name: 'Athènes', lat: 37.9364, lng: 23.9445 },
+        { icao: 'LGIR', name: 'Heraklion', lat: 35.3397, lng: 25.1803 }
+    ];
+
+    let currentAirport = null;
+    let score = 0;
+    let rounds = 0;
+    let isWaitingForNext = false;
+    let currentMarker = null;
+    let userMarker = null;
+    let line = null;
+
+    const targetIcon = L.divIcon({ className: 'marker-target', iconSize: [16, 16] });
+    const userIcon = L.divIcon({ className: 'marker-user', iconSize: [12, 12] });
+
+    const map = L.map('map', { zoomControl: true }).setView([50.0, 10.0], 4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        noWrap: true
+    }).addTo(map);
+
+    nextRound();
+
+    function nextRound() {
+        if (currentMarker) map.removeLayer(currentMarker);
+        if (userMarker) map.removeLayer(userMarker);
+        if (line) map.removeLayer(line);
+
+        isWaitingForNext = false;
+        document.getElementById('next-btn').disabled = true;
+        const feedbackEl = document.getElementById('feedback');
+        feedbackEl.innerHTML = "Cliquez sur la carte...";
+        feedbackEl.className = "";
+
+        const randomIndex = Math.floor(Math.random() * airports.length);
+        currentAirport = airports[randomIndex];
+
+        document.getElementById('target-icao').innerText = currentAirport.icao;
+    }
+
+    map.on('click', function(e) {
+        if (isWaitingForNext || !currentAirport) return;
+
+        const targetLatLng = L.latLng(currentAirport.lat, currentAirport.lng);
+        const distance = e.latlng.distanceTo(targetLatLng);
+        const distanceKm = Math.round(distance / 1000);
+
+        userMarker = L.marker(e.latlng, { icon: userIcon }).addTo(map);
+        currentMarker = L.marker(targetLatLng, { icon: targetIcon }).addTo(map)
+            .bindPopup(`<b>${currentAirport.name} (${currentAirport.icao})</b>`).openPopup();
+
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        line = L.polyline([e.latlng, targetLatLng], { color: isDark ? '#6E7E8A' : '#8A9CA8', dashArray: '5, 5' }).addTo(map);
+
+        rounds++;
+        const feedbackEl = document.getElementById('feedback');
+
+        if (distanceKm <= 150) {
+            score++;
+            feedbackEl.innerHTML = `Bravo. C'était bien ${currentAirport.name}. Vous étiez à ${distanceKm} km.`;
+            feedbackEl.className = "correct";
+        } else {
+            feedbackEl.innerHTML = `Raté. Il s'agissait de ${currentAirport.name}. Vous avez cliqué à ${distanceKm} km de distance.`;
+            feedbackEl.className = "incorrect";
+        }
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('rounds').innerText = rounds;
+
+        isWaitingForNext = true;
+        document.getElementById('next-btn').disabled = false;
+    });
+  </script>
+</body>
+</html>
