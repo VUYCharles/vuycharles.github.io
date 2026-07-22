@@ -15,6 +15,19 @@
 
 const projectsDB = [
   // ----- PROJETS PERSONNELS -----
+  { id: "perso-1",
+    title: "Tournois de Pétanque",
+    tag: "WebAPP",
+    date: "2026-07-22",
+    statut: "actif",
+    description: "Entrez les équipes et organisez votre tournois de pétanque.",
+    tech: { 
+      Langage: "HTML - CSS - JS",
+      Lien: "perso/petanque-tournoi.html" 
+    },
+    categorie: "perso"  // ou "mcta"
+  },
+
   // {
     // id: "perso-1",
     // title: "Outil de planification",
@@ -30,21 +43,21 @@ const projectsDB = [
     // },
     // categorie: "perso"
   // },
-  // {
-  //   id: "perso-2",
-  //   title: "Parser météo aéro",
-  //   tag: "météo",
-  //   date: "2026-03-22",
-  //   statut: "terminé",
-  //   description: "Extraction et mise en forme des données METAR/TAF. Affichage minimaliste pour une lecture rapide avant vol.",
-  //   tech: {
-  //     Langage: "JavaScript",
-  //     Runtime: "Node.js",
-  //     API: "AviationWeather",
-  //     Lien: "https://github.com/exemple/meteo-aero"
-  //   },
-  //   categorie: "perso"
-  // },
+//  {
+//     id: "perso-2",
+//     title: "Parser météo aéro",
+//     tag: "météo",
+//     date: "2026-03-22",
+//     statut: "terminé",
+//     description: "Extraction et mise en forme des données METAR/TAF. Affichage minimaliste pour une lecture rapide avant vol.",
+//     tech: {
+//       Langage: "JavaScript",
+//       Runtime: "Node.js",
+//       API: "AviationWeather",
+//       Lien: "https://github.com/exemple/meteo-aero"
+//     },
+//     categorie: "perso"
+//   },
   // {
   //   id: "perso-3",
   //   title: "Dashboard silencieux",

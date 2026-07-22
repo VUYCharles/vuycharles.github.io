@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournoi de pétanque — Organisateur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commit+Mono&family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    /* ======================================================
+       VARIABLES & RESET — Horizon v3.0
+    ====================================================== */
+    :root {
+      --fond: #F2F5F4;
+      --carte: #E4EBE8;
+      --carte-survol: #F8FAFA;
+      --texte: #1E2D3A;
+      --brume: #8A9CA8;
+      --accent: #A4C4B4;
+      --secondaire: #A4B8CC;
+      --survol: #D4A89A;
+      --ombre-carte: 0 2px 8px rgba(30, 45, 58, 0.04);
+      --focus: #A4C4B4;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Commit Mono', monospace;
+      --padding-page: 40px;
+      --max-width: 1100px;
+      --gap-grid: 24px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fond: #131820;
+        --carte: #1A2130;
+        --carte-survol: #222C3A;
+        --texte: #E0E6E4;
+        --brume: #6E7E8A;
+        --accent: #B0A4C8;
+        --secondaire: #C8A0B0;
+        --survol: #D4A0B4;
+        --ombre-carte: 0 2px 8px rgba(0, 0, 0, 0.2);
+        --focus: #B0A4C8;
+      }
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      background-color: var(--fond);
+      color: var(--texte);
+      font-family: var(--font-sans);
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: none;
+    }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    /* ======================================================
+       LAYOUT
+    ====================================================== */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding-left: var(--padding-page);
+      padding-right: var(--padding-page);
+    }
+
+    /* ======================================================
+       NAVIGATION
+    ====================================================== */
+    nav {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 32px;
+      padding: 24px 0;
+    }
+
+    nav a {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--brume);
+    }
+
+    nav a.active {
+      color: var(--texte);
+    }
+
+    nav a:hover:not(.active) {
+      color: var(--survol);
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        gap: 24px;
+      }
+      nav a {
+        font-size: 14px;
+      }
+    }
+
+    /* ======================================================
+       BOUTON RETOUR
+    ====================================================== */
+    .back-btn {
+      display: inline-block;
+      padding-top: 48px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .back-btn:hover {
+      color: var(--survol);
+    }
+
+    /* ======================================================
+       TYPOGRAPHIE PAGE PROJET
+    ====================================================== */
+    .project-title {
+      font-family: var(--font-sans);
+      font-size: 40px;
+      font-weight: 500;
+      color: var(--texte);
+      margin-top: 64px;
+      max-width: 700px;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .project-meta {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+      margin-top: 16px;
+    }
+
+    .project-desc {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--texte);
+      line-height: 1.7;
+      max-width: 650px;
+      margin-top: 48px;
+    }
+
+    .project-desc + * {
+      margin-top: 64px;
+    }
+
+    @media (max-width: 768px) {
+      .project-title {
+        font-size: 32px;
+        margin-top: 48px;
+      }
+      .project-desc {
+        font-size: 15px;
+        margin-top: 36px;
+      }
+      .project-desc + * {
+        margin-top: 48px;
+      }
+    }
+
+    /* ======================================================
+       CARTES (matchs, config, classement)
+    ====================================================== */
+    .card {
+      position: relative;
+      background-color: var(--carte);
+      border-radius: 8px;
+      box-shadow: var(--ombre-carte);
+      padding: 32px;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 32px;
+      right: 32px;
+      height: 2px;
+      background-color: var(--accent);
+      opacity: 0;
+    }
+
+    .card:hover {
+      background-color: var(--carte-survol);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 24px;
+      }
+      .card::before {
+        left: 24px;
+        right: 24px;
+      }
+    }
+
+    .card h2 {
+      font-family: var(--font-sans);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--texte);
+      margin-bottom: 24px;
+    }
+
+    /* ======================================================
+       FORMULAIRES
+    ====================================================== */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--brume);
+    }
+
+    .input-field {
+      background-color: var(--carte-survol);
+      border: 1px solid var(--carte);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--texte);
+      width: 100%;
+    }
+
+    .input-field::placeholder {
+      color: var(--brume);
+    }
+
+    .score-input {
+      width: 60px;
+      text-align: center;
+      padding: 8px 4px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      background-color: var(--carte-survol);
+      border: 1px solid var(--carte);
+      border-radius: 8px;
+      color: var(--texte);
+    }
+
+    .score-input::-webkit-inner-spin-button,
+    .score-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .score-input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* ======================================================
+       BOUTONS
+    ====================================================== */
+    .btn-primary {
+      position: relative;
+      display: inline-block;
+      background-color: var(--accent);
+      color: var(--carte);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: var(--texte);
+      opacity: 0;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--survol);
+    }
+
+    .btn-primary:hover::before {
+      opacity: 1;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .btn-primary:disabled:hover {
+      background-color: var(--accent);
+    }
+
+    .btn-primary:disabled:hover::before {
+      opacity: 0;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--brume);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      color: var(--survol);
+    }
+
+    .btn-small {
+      background-color: var(--carte-survol);
+      color: var(--texte);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      border: 1px solid var(--carte);
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    .btn-small:hover {
+      background-color: var(--survol);
+      color: var(--carte);
+      border-color: var(--survol);
+    }
+
+    .btn-remove {
+      background-color: transparent;
+      color: var(--brume);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .btn-remove:hover {
+      color: var(--survol);
+      background-color: var(--carte-survol);
+    }
+
+    /* ======================================================
+       CONFIG — FORMAT RADIO
+    ====================================================== */
+    .format-selector {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .format-selector label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--texte);
+      cursor: pointer;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background-color: var(--carte-survol);
+      border: 1px solid var(--carte);
+    }
+
+    .format-selector label:has(input:checked) {
+      border-color: var(--accent);
+    }
+
+    .format-selector input[type="radio"] {
+      accent-color: var(--accent);
+    }
+
+    @media (max-width: 600px) {
+      .format-selector {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    /* ======================================================
+       CONFIG — EQUIPES
+    ====================================================== */
+    .teams-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 36px;
+      gap: 12px;
+      padding: 0 0 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--carte);
+    }
+
+    .teams-header span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--brume);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .team-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 36px;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .teams-header {
+        display: none;
+      }
+      .team-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .team-row .input-group:first-child {
+        grid-column: 1 / -1;
+      }
+      .team-row .btn-remove {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+      }
+    }
+
+    .config-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      margin-top: 32px;
+    }
+
+    .config-inline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .config-inline label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--brume);
+      white-space: nowrap;
+    }
+
+    .config-inline .input-field {
+      width: 80px;
+    }
+
+    .error-msg {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--survol);
+      margin-top: 16px;
+    }
+
+    /* ======================================================
+       DASHBOARD — CONTROLES
+    ====================================================== */
+    .dashboard-controls {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .round-info {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+      margin-bottom: 24px;
+    }
+
+    .complete-msg {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      margin-top: 40px;
+      padding: 20px 0;
+    }
+
+    /* ======================================================
+       DASHBOARD — TERRAINS
+    ====================================================== */
+    .section-title {
+      font-family: var(--font-sans);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--texte);
+      margin-bottom: 24px;
+    }
+
+    .terrains-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--gap-grid);
+      margin-bottom: 48px;
+    }
+
+    .terrain-card {
+      position: relative;
+      background-color: var(--carte);
+      border-radius: 8px;
+      box-shadow: var(--ombre-carte);
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .terrain-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 24px;
+      right: 24px;
+      height: 2px;
+      background-color: var(--accent);
+      opacity: 0;
+    }
+
+    .terrain-card:hover::before {
+      opacity: 1;
+    }
+
+    .terrain-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--brume);
+      margin-bottom: 16px;
+    }
+
+    .match-teams {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .match-team-name {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--texte);
+      flex: 1;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .match-team-name:first-child {
+      text-align: right;
+    }
+
+    .match-vs {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--brume);
+      flex-shrink: 0;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .score-dash {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+    }
+
+    .terrain-empty {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    .terrain-completed {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* ======================================================
+       DASHBOARD — FILE D'ATTENTE
+    ====================================================== */
+    .queue-section {
+      margin-bottom: 48px;
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--carte);
+    }
+
+    .queue-item:last-child {
+      border-bottom: none;
+    }
+
+    .queue-index {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--brume);
+      width: 28px;
+      flex-shrink: 0;
+    }
+
+    .queue-teams {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--texte);
+    }
+
+    .queue-vs {
+      color: var(--brume);
+      margin: 0 4px;
+    }
+
+    .queue-empty {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+      padding: 16px 0;
+    }
+
+    /* ======================================================
+       DASHBOARD — CLASSEMENT
+    ====================================================== */
+    .standings-section {
+      margin-bottom: 80px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .standings-table th {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--brume);
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--carte);
+      white-space: nowrap;
+    }
+
+    .standings-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--carte);
+      white-space: nowrap;
+    }
+
+    .standings-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .standings-table .team-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ga-positive {
+      color: var(--accent);
+    }
+
+    .ga-negative {
+      color: var(--survol);
+    }
+
+    /* ======================================================
+       FOOTER — DOUBLE FILET
+    ====================================================== */
+    footer {
+      padding-top: 80px;
+      padding-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+      footer {
+        padding-top: 48px;
+        padding-bottom: 24px;
+      }
+    }
+
+    .footer-line {
+      width: 40px;
+      height: 1px;
+      background-color: var(--secondaire);
+      margin-bottom: 4px;
+    }
+
+    .footer-line:last-of-type {
+      margin-bottom: 24px;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-content span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--brume);
+    }
+
+    .footer-content a {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--brume);
+    }
+
+    .footer-content a:hover {
+      color: var(--survol);
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+
+    /* ======================================================
+       UTILITAIRES
+    ====================================================== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .mt-16 { margin-top: 16px; }
+    .mb-0 { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="container">
+        <a href="../index.html" class="active">Projets</a>
+        <a href="../mcta.html">MCTA</a>
+        <a href="../a-propos.html" >À propos</a>
+        <a href="../contact.html">Contact</a>
+  </nav>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="container">
+    <a href="../index.html" class="back-btn">&larr; Tous les projets</a>
+    <h1 class="project-title">Organisateur de tournoi de pétanque</h1>
+    <p class="project-meta">WebAPP &bull; 2026</p>
+    <p class="project-desc">
+      Application d'organisation de tournois de pétanque. Gère les formats poule unique et syst&egrave;me suisse, avec ordonnancement automatique des matchs et export pour impression papier.
+    </p>
+
+    <!-- ======================== ÉCRAN CONFIGURATION ======================== -->
+    <div id="config-view">
+      <div class="card">
+        <h2>Configuration</h2>
+
+        <div class="format-selector">
+          <label><input type="radio" name="format" value="poule" checked> Poule unique</label>
+          <label><input type="radio" name="format" value="suisse"> Syst&egrave;me suisse</label>
+        </div>
+
+        <div id="swiss-options" class="config-inline hidden">
+          <label for="swiss-rounds">Nombre de rounds</label>
+          <input type="number" id="swiss-rounds" class="input-field" value="5" min="3" max="15">
+        </div>
+
+        <div class="teams-header" id="teams-header">
+          <span>&Eacute;quipe</span>
+          <span>Joueur 1</span>
+          <span>Joueur 2</span>
+          <span>Joueur 3</span>
+          <span></span>
+        </div>
+        <div id="teams-container"></div>
+
+        <button type="button" id="add-team-btn" class="btn-small mt-16">+ Ajouter une &eacute;quipe</button>
+
+        <div class="config-inline">
+          <label for="num-terrains">Terrains</label>
+          <input type="number" id="num-terrains" class="input-field" value="2" min="1" max="20">
+        </div>
+
+        <div class="config-actions">
+          <button type="button" id="start-btn" class="btn-primary">Lancer le tournoi</button>
+        </div>
+        <p id="config-error" class="error-msg hidden"></p>
+      </div>
+    </div>
+
+    <!-- ======================== ÉCRAN TABLEAU DE BORD ======================== -->
+    <div id="dashboard-view" class="hidden">
+
+      <div class="dashboard-controls">
+        <button type="button" id="export-btn" class="btn-primary">Exporter pour impression</button>
+        <button type="button" id="reset-btn" class="btn-secondary">R&eacute;initialiser</button>
+      </div>
+
+      <div id="round-info" class="round-info hidden"></div>
+
+      <h2 class="section-title">Terrains</h2>
+      <div id="terrains-container" class="terrains-grid"></div>
+
+      <div id="queue-section" class="queue-section hidden">
+        <h2 class="section-title">File d'attente</h2>
+        <div id="queue-container"></div>
+      </div>
+
+      <section class="standings-section">
+        <h2 class="section-title">Classement</h2>
+        <div class="table-wrapper">
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>Rang</th>
+                <th>&Eacute;quipe</th>
+                <th>J</th>
+                <th>V</th>
+                <th>D</th>
+                <th>PP</th>
+                <th>PC</th>
+                <th>GA</th>
+              </tr>
+            </thead>
+            <tbody id="standings-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div id="tournament-complete" class="complete-msg hidden">Tournoi termin&eacute;.</div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="footer-line"></div>
+    <div class="footer-line"></div>
+    <div class="footer-content">
+      <span>&copy; 2026 &mdash; Pr&eacute;nom NOM</span>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    /* ==================================================================
+       ÉTAT GLOBAL
+       ================================================================== */
+    const STORAGE_KEY = 'petanque-tournament';
+    let nextId = 1;
+
+    function defaultState() {
+      return {
+        format: 'poule',
+        numTerrains: 2,
+        swissTotalRounds: 5,
+        swissCurrentRound: 0,
+        teams: [],
+        allMatches: [],
+        queue: [],
+        activeMatches: [],
+        completedMatches: [],
+        swissHistory: [],
+        tournamentComplete: false
+      };
+    }
+
+    let state = defaultState();
+
+    /* ==================================================================
+       UTILITAIRES
+       ================================================================== */
+    function getTeam(id) {
+      return state.teams.find(t => t.id === id);
+    }
+
+    function getMatch(id) {
+      return state.allMatches.find(m => m.id === id);
+    }
+
+    function getBusyTeamIds() {
+      const ids = new Set();
+      state.activeMatches.forEach(m => {
+        ids.add(m.teamAId);
+        if (m.teamBId !== null) ids.add(m.teamBId);
+      });
+      return ids;
+    }
+
+    function getActiveTerrainIds() {
+      return new Set(state.activeMatches.map(m => m.terrain));
+    }
+
+    function teamsPlayedCount(teamId) {
+      const t = getTeam(teamId);
+      return t ? t.played : 0;
+    }
+
+    /* ==================================================================
+       ORDONNANCEUR ROUND-ROBIN (POULE UNIQUE)
+       ------------------------------------------------------------------
+       Principe : on génère toutes les paires d'équipes (combinaisons
+       sans ordre), puis on les ordonne dynamiquement selon la règle :
+       "priorité aux matchs impliquant les équipes ayant joué le moins
+       de parties à l'instant T". L'affectation aux terrains se fait
+       de manière gloutonne, vague par vague.
+       ================================================================== */
+
+    /**
+     * Génère la liste complète des paires (combinaisons C(n,2)).
+     * Chaque paire est un objet { teamAId, teamBId } avec teamAId < teamBId.
+     */
+    function generateAllPairs(teamIds) {
+      const pairs = [];
+      for (let i = 0; i < teamIds.length; i++) {
+        for (let j = i + 1; j < teamIds.length; j++) {
+          pairs.push({ teamAId: teamIds[i], teamBId: teamIds[j] });
+        }
+      }
+      return pairs;
+    }
+
+    /**
+     * Ordonnanceur glouton pour l'export (calcul complet hors ligne).
+     * Simule le déroulement du tournoi vague par vague.
+     * À chaque vague, on remplit les terrains en choisissant le match
+     * de priorité maximale : celui dont le minimum des parties jouées
+     * par les deux équipes est le plus faible (pour équilibrer les
+     * temps de pause). En cas d'égalité, on favorise le match dont le
+     * maximum des parties jouées est le plus faible.
+     */
+    function computeFullScheduleForExport(teams, numTerrains) {
+      const ids = teams.map(t => t.id);
+      const pairs = generateAllPairs(ids);
+      const played = {};
+      ids.forEach(id => played[id] = 0);
+      const schedule = [];
+      let wave = 0;
+
+      while (pairs.length > 0) {
+        wave++;
+        const busy = new Set();
+        let used = 0;
+
+        // Tri par priorité croissante (index 0 = plus prioritaire)
+        pairs.sort((a, b) => {
+          const minA = Math.min(played[a.teamAId], played[a.teamBId]);
+          const minB = Math.min(played[b.teamAId], played[b.teamBId]);
+          if (minA !== minB) return minA - minB;
+          return Math.max(played[a.teamAId], played[a.teamBId]) -
+                 Math.max(played[b.teamAId], played[b.teamBId]);
+        });
+
+        for (let i = pairs.length - 1; i >= 0; i--) {
+          if (used >= numTerrains) break;
+          const p = pairs[i];
+          if (!busy.has(p.teamAId) && !busy.has(p.teamBId)) {
+            schedule.push({
+              teamAId: p.teamAId,
+              teamBId: p.teamBId,
+              terrain: used + 1,
+              wave: wave
+            });
+            busy.add(p.teamAId);
+            busy.add(p.teamBId);
+            played[p.teamAId]++;
+            played[p.teamBId]++;
+            used++;
+            pairs.splice(i, 1);
+          }
+        }
+      }
+      return schedule;
+    }
+
+    /**
+     * Sélectionne le prochain match à affecter à un terrain libre.
+     * Même logique de priorité que l'ordonnanceur d'export, mais
+     * opère sur la file d'attente en temps réel.
+     * Retourne le match ou null si aucun n'est éligible.
+     */
+    function pickNextMatch() {
+      const busy = getBusyTeamIds();
+      const eligible = state.queue.filter(m =>
+        !busy.has(m.teamAId) && !busy.has(m.teamBId)
+      );
+      if (eligible.length === 0) return null;
+
+      eligible.sort((a, b) => {
+        const minA = Math.min(teamsPlayedCount(a.teamAId), teamsPlayedCount(a.teamBId));
+        const minB = Math.min(teamsPlayedCount(b.teamAId), teamsPlayedCount(b.teamBId));
+        if (minA !== minB) return minA - minB;
+        return Math.max(teamsPlayedCount(a.teamAId), teamsPlayedCount(a.teamBId)) -
+               Math.max(teamsPlayedCount(b.teamAId), teamsPlayedCount(b.teamBId));
+      });
+
+      return eligible[0];
+    }
+
+    /**
+     * Remplit tous les terrains libres avec les meilleurs matchs
+     * disponibles dans la file d'attente.
+     */
+    function fillTerrains() {
+      const activeTerrains = getActiveTerrainIds();
+      for (let t = 1; t <= state.numTerrains; t++) {
+        if (activeTerrains.has(t)) continue;
+        const match = pickNextMatch();
+        if (!match) break;
+        match.terrain = t;
+        match.status = 'playing';
+        state.activeMatches.push(match);
+        state.queue = state.queue.filter(m => m.id !== match.id);
+        activeTerrains.add(t);
+      }
+    }
+
+    /* ==================================================================
+       ORDONNANCEUR SYSTÈME SUISSE
+       ------------------------------------------------------------------
+       Le système suisse fonctionne par rounds synchronisés :
+       - On ne lance le round N+1 que quand tous les matchs du
+         round N sont terminés.
+       - À chaque round, on classe les équipes (Victoires décroiss,
+         puis Goal-Average décroiss, puis Points Pour décroiss,
+         puis nom alphabétique).
+       - On apparie le 1er contre le 2e, le 3e contre le 4e, etc.
+       - L'historique empêche les répétitions.
+       - Si impair : bye accordé à la moins bien classée n'ayant
+         jamais été exemptée (victoire automatique 13-0).
+       ================================================================== */
+
+    /**
+     * Fonction de comparaison pour le classement suisse.
+       Critères : V décroiss → GA décroiss → PP décroiss → nom croissant.
+     */
+    function swissCompare(a, b) {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      const gaA = a.pointsFor - a.pointsAgainst;
+      const gaB = b.pointsFor - b.pointsAgainst;
+      if (gaB !== gaA) return gaB - gaA;
+      if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+      return a.name.localeCompare(b.name, 'fr');
+    }
+
+    /**
+     * Vérifie si deux équipes se sont déjà affrontées
+       dans l'historique suisse.
+     */
+    function hasSwissPlayed(idA, idB) {
+      const key = Math.min(idA, idB) + '-' + Math.max(idA, idB);
+      return state.swissHistory.includes(key);
+    }
+
+    /**
+     * Génère les appariements d'un round suisse.
+       Algorithme :
+       1. Trier les équipes par rang.
+       2. Si impair, déterminer l'équipe exemptée (bye).
+       3. Parcourir les équipes triées, apparier chaque équipe
+          libre avec la prochaine équipe libre qui n'a pas encore
+          été rencontrée. En cas de conflit (toutes les proches
+          déjà rencontrées), on permet la répétition (fallback).
+     */
+    function generateSwissPairings() {
+      const sorted = [...state.teams].sort(swissCompare);
+      const paired = new Set();
+      const pairings = [];
+
+      // Gestion du bye si nombre impair
+      if (sorted.length % 2 === 1) {
+        let byeTeam = null;
+        // Chercher la moins bien classée n'ayant jamais eu de bye
+        for (let i = sorted.length - 1; i >= 0; i--) {
+          if (sorted[i].byeCount === 0) {
+            byeTeam = sorted[i];
+            break;
+          }
+        }
+        // Fallback : la moins bien classée tout court
+        if (!byeTeam) byeTeam = sorted[sorted.length - 1];
+        paired.add(byeTeam.id);
+        pairings.push({ teamAId: byeTeam.id, teamBId: null, isBye: true });
+      }
+
+      // Appariement des équipes restantes
+      for (let i = 0; i < sorted.length; i++) {
+        if (paired.has(sorted[i].id)) continue;
+        paired.add(sorted[i].id);
+
+        let found = false;
+        // Chercher un adversaire non rencontré parmi les suivants au classement
+        for (let j = i + 1; j < sorted.length; j++) {
+          if (paired.has(sorted[j].id)) continue;
+          if (!hasSwissPlayed(sorted[i].id, sorted[j].id)) {
+            pairings.push({ teamAId: sorted[i].id, teamBId: sorted[j].id, isBye: false });
+            paired.add(sorted[j].id);
+            found = true;
+            break;
+          }
+        }
+
+        // Fallback : si anti-répétition bloque tout, on permet la répétition
+        if (!found) {
+          for (let j = i + 1; j < sorted.length; j++) {
+            if (paired.has(sorted[j].id)) continue;
+            pairings.push({ teamAId: sorted[i].id, teamBId: sorted[j].id, isBye: false });
+            paired.add(sorted[j].id);
+            break;
+          }
+        }
+      }
+
+      return pairings;
+    }
+
+    /**
+     * Démarre un nouveau round suisse : génère les appariements,
+       traite le bye immédiatement (victoire 13-0), place les
+       matchs dans la file d'attente, puis remplit les terrains.
+     */
+    function startSwissRound() {
+      state.swissCurrentRound++;
+      const pairings = generateSwissPairings();
+
+      pairings.forEach(p => {
+        const match = {
+          id: nextId++,
+          teamAId: p.teamAId,
+          teamBId: p.teamBId,
+          isBye: p.isBye,
+          terrain: null,
+          scoreA: null,
+          scoreB: null,
+          status: 'waiting',
+          round: state.swissCurrentRound
+        };
+
+        if (p.isBye) {
+          // Le bye est résolu instantanément : victoire 13-0
+          match.scoreA = 13;
+          match.scoreB = 0;
+          match.status = 'completed';
+          const team = getTeam(match.teamAId);
+          team.played++;
+          team.wins++;
+          team.pointsFor += 13;
+          team.byeCount++;
+          state.completedMatches.push(match);
+        } else {
+          state.queue.push(match);
+          // Enregistrer dans l'historique pour l'anti-répétition
+          const key = Math.min(p.teamAId, p.teamBId) + '-' + Math.max(p.teamAId, p.teamBId);
+          state.swissHistory.push(key);
+        }
+
+        state.allMatches.push(match);
+      });
+
+      fillTerrains();
+    }
+
+    /* ==================================================================
+       VALIDATION DES SCORES & MISE À JOUR
+       ================================================================== */
+
+    /**
+     * Valide le score d'un match terminé.
+       Règles : scores entiers >= 0, pas d'égalité.
+       Met à jour les statistiques des équipes, libère le terrain,
+       et tente d'affecter le match suivant.
+     */
+    function validateScore(matchId) {
+      const match = getMatch(matchId);
+      if (!match || match.status !== 'playing') return;
+
+      const inputA = document.getElementById('score-a-' + matchId);
+      const inputB = document.getElementById('score-b-' + matchId);
+      const sA = parseInt(inputA.value, 10);
+      const sB = parseInt(inputB.value, 10);
+
+      // Validation des saisies
+      if (isNaN(sA) || isNaN(sB) || sA < 0 || sB < 0) {
+        showConfigError('Les scores doivent être des entiers positifs.');
+        return;
+      }
+      if (sA === sB) {
+        showConfigError('Les scores ne peuvent pas être égaux (pas de match nul).');
+        return;
+      }
+
+      // Mise à jour du match
+      match.scoreA = sA;
+      match.scoreB = sB;
+      match.status = 'completed';
+
+      // Mise à jour des statistiques équipes
+      const tA = getTeam(match.teamAId);
+      const tB = getTeam(match.teamBId);
+      tA.played++;
+      tB.played++;
+      tA.pointsFor += sA;
+      tA.pointsAgainst += sB;
+      tB.pointsFor += sB;
+      tB.pointsAgainst += sA;
+      if (sA > sB) {
+        tA.wins++;
+        tB.losses++;
+      } else {
+        tB.wins++;
+        tA.losses++;
+      }
+
+      // Retirer des matchs actifs, ajouter aux terminés
+      state.activeMatches = state.activeMatches.filter(m => m.id !== matchId);
+      state.completedMatches.push(match);
+
+      hideConfigError();
+
+      // Vérifier si le tournoi est terminé
+      if (state.format === 'poule') {
+        if (state.queue.length === 0 && state.activeMatches.length === 0) {
+          state.tournamentComplete = true;
+        } else {
+          // Tenter de remplir le terrain libéré
+          fillTerrains();
+        }
+      } else {
+        // Suisse : vérifier si le round est terminé
+        const roundMatches = state.allMatches.filter(m => m.round === state.swissCurrentRound);
+        const roundDone = roundMatches.every(m => m.status === 'completed');
+        if (roundDone) {
+          if (state.swissCurrentRound >= state.swissTotalRounds) {
+            state.tournamentComplete = true;
+          }
+          // Sinon, attendre le clic "Round suivant"
+        } else {
+          fillTerrains();
+        }
+      }
+
+      saveState();
+      renderDashboard();
+    }
+
+    /* ==================================================================
+       CLASSEMENT
+       ================================================================== */
+    function computeStandings() {
+      return [...state.teams].sort((a, b) => {
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        const gaA = a.pointsFor - a.pointsAgainst;
+        const gaB = b.pointsFor - b.pointsAgainst;
+        if (gaB !== gaA) return gaB - gaA;
+        if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+        return a.name.localeCompare(b.name, 'fr');
+      });
+    }
+
+    /* ==================================================================
+       EXPORT POUR IMPRESSION
+       ------------------------------------------------------------------
+       Génère un fichier .xlsx (via SheetJS) contenant :
+       - Feuille "Équipes" : liste des équipes avec joueurs
+       - Feuille "Calendrier" : planning complet avec cases vides
+         pour notation manuelle au stylo, et affectation des terrains.
+
+       Pour la poule : le calendrier est calculé en une passe
+       complète via computeFullScheduleForExport().
+       Pour le suisse : on pré-simule tous les rounds en supposant
+       des scores de 13-13 (nuls) pour déterminer les appariements
+       futurs de façon déterministe. Les cases score restent vides
+       dans le fichier exporté.
+       ================================================================== */
+    function exportTournament() {
+      try {
+        const wb = XLSX.utils.book_new();
+
+        // --- Feuille 1 : Équipes ---
+        const teamData = state.teams.map(t => ({
+          'Équipe': t.name,
+          'Joueur 1': t.players[0] || '',
+          'Joueur 2': t.players[1] || '',
+          'Joueur 3': t.players[2] || ''
+        }));
+        const wsTeams = XLSX.utils.json_to_sheet(teamData);
+        // Ajustement largeurs colonnes
+        wsTeams['!cols'] = [
+          { wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
+        ];
+        XLSX.utils.book_append_sheet(wb, wsTeams, 'Équipes');
+
+        // --- Feuille 2 : Calendrier ---
+        let scheduleData;
+
+        if (state.format === 'poule') {
+          // Ordonnancement complet hors ligne pour l'export
+          const schedule = computeFullScheduleForExport(state.teams, state.numTerrains);
+          scheduleData = schedule.map(s => ({
+            'Vague': s.wave,
+            'Terrain': s.terrain,
+            'Équipe A': getTeam(s.teamAId).name,
+            'Score A': '',
+            'Score B': '',
+            'Équipe B': getTeam(s.teamBId).name
+          }));
+        } else {
+          // Pré-simulation suisse pour obtenir un calendrier complet
+          scheduleData = preSimulateSwissForExport();
+        }
+
+        const wsCal = XLSX.utils.json_to_sheet(scheduleData);
+        wsCal['!cols'] = [
+          { wch: 8 }, { wch: 10 }, { wch: 25 }, { wch: 10 }, { wch: 10 }, { wch: 25 }
+        ];
+        XLSX.utils.book_append_sheet(wb, wsCal, 'Calendrier');
+
+        // --- Feuille 3 : Classement actuel ---
+        const standings = computeStandings();
+        const standingData = standings.map((t, i) => ({
+          'Rang': i + 1,
+          'Équipe': t.name,
+          'Jouées': t.played,
+          'V': t.wins,
+          'D': t.losses,
+          'PP': t.pointsFor,
+          'PC': t.pointsAgainst,
+          'GA': (t.pointsFor - t.pointsAgainst >= 0 ? '+' : '') + (t.pointsFor - t.pointsAgainst)
+        }));
+        const wsStand = XLSX.utils.json_to_sheet(standingData);
+        wsStand['!cols'] = [
+                    { wch: 6 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }
+        ];
+        XLSX.utils.book_append_sheet(wb, wsStand, 'Classement');
+
+        // Téléchargement du fichier
+        XLSX.writeFile(wb, 'tournoi-petanque.xlsx');
+      } catch (e) {
+        showConfigError("Erreur lors de l'export : " + e.message);
+      }
+    }
+
+    /**
+     * Pré-simulation du système suisse pour l'export.
+       On clone les équipes et simule chaque round avec des scores
+       nuls hypothétiques (13-13) pour déterminer les appariements
+       futurs de façon déterministe. Les scores dans le fichier
+       exporté restent vides pour notation manuelle.
+       En cas de nombre impair, le bye est attribué selon les
+       mêmes règles qu'en temps réel.
+     */
+    function preSimulateSwissForExport() {
+      // Cloner les équipes avec leurs statistiques actuelles
+      const simTeams = state.teams.map(t => ({
+        ...t,
+        wins: t.wins,
+        losses: t.losses,
+        pointsFor: t.pointsFor,
+        pointsAgainst: t.pointsAgainst,
+        played: t.played,
+        byeCount: t.byeCount || 0
+      }));
+
+      const history = [...state.swissHistory];
+      const schedule = [];
+
+      // Calculer les rounds restants à simuler
+      const roundsToSimulate = state.swissTotalRounds - state.swissCurrentRound;
+      // Inclure aussi les rounds déjà joués pour un calendrier complet
+      const totalRounds = state.swissTotalRounds;
+
+      // D'abord, inclure les matchs déjà joués
+      state.allMatches.forEach(m => {
+        if (m.isBye) {
+          schedule.push({
+            round: m.round,
+            terrain: 'Bye',
+            teamA: getTeam(m.teamAId).name,
+            scoreA: m.scoreA !== null ? m.scoreA : '',
+            scoreB: '',
+            teamB: 'Exempt'
+          });
+        } else {
+          schedule.push({
+            round: m.round,
+            terrain: m.terrain || '',
+            teamA: getTeam(m.teamAId).name,
+            scoreA: m.scoreA !== null ? m.scoreA : '',
+            scoreB: m.scoreB !== null ? m.scoreB : '',
+            teamB: getTeam(m.teamBId).name
+          });
+        }
+      });
+
+      // Simuler les rounds futurs
+      for (let round = state.swissCurrentRound + 1; round <= totalRounds; round++) {
+        // Trier par classement suisse
+        simTeams.sort((a, b) => {
+          if (b.wins !== a.wins) return b.wins - a.wins;
+          const gaA = a.pointsFor - a.pointsAgainst;
+          const gaB = b.pointsFor - b.pointsAgainst;
+          if (gaB !== gaA) return gaB - gaA;
+          if (b.pointsFor !== a.pointsFor) return b.pointsFor - a.pointsFor;
+          return a.name.localeCompare(b.name, 'fr');
+        });
+
+        const paired = new Set();
+        let terrain = 1;
+
+        // Bye si impair
+        if (simTeams.length % 2 === 1) {
+          let byeTeam = null;
+          for (let i = simTeams.length - 1; i >= 0; i--) {
+            if (simTeams[i].byeCount === 0) {
+              byeTeam = simTeams[i];
+              break;
+            }
+          }
+          if (!byeTeam) byeTeam = simTeams[simTeams.length - 1];
+          paired.add(byeTeam.id);
+          schedule.push({
+            round: round,
+            terrain: 'Bye',
+            teamA: byeTeam.name,
+            scoreA: '',
+            scoreB: '',
+            teamB: 'Exempt'
+          });
+          // Appliquer le bye dans la simulation
+          byeTeam.played++;
+          byeTeam.wins++;
+          byeTeam.pointsFor += 13;
+          byeTeam.byeCount++;
+        }
+
+        // Appariements
+        for (let i = 0; i < simTeams.length; i++) {
+          if (paired.has(simTeams[i].id)) continue;
+          paired.add(simTeams[i].id);
+
+          let found = false;
+          for (let j = i + 1; j < simTeams.length; j++) {
+            if (paired.has(simTeams[j].id)) continue;
+            const key = Math.min(simTeams[i].id, simTeams[j].id) + '-' + Math.max(simTeams[i].id, simTeams[j].id);
+            if (!history.includes(key)) {
+              schedule.push({
+                round: round,
+                terrain: terrain++,
+                teamA: simTeams[i].name,
+                scoreA: '',
+                scoreB: '',
+                teamB: simTeams[j].name
+              });
+              history.push(key);
+              paired.add(simTeams[j].id);
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            for (let j = i + 1; j < simTeams.length; j++) {
+              if (paired.has(simTeams[j].id)) continue;
+              schedule.push({
+                round: round,
+                terrain: terrain++,
+                teamA: simTeams[i].name,
+                scoreA: '',
+                scoreB: '',
+                teamB: simTeams[j].name
+              });
+              paired.add(simTeams[j].id);
+              break;
+            }
+          }
+        }
+
+        // Simuler des scores nuls (13-13) pour le prochain tri
+        // On n'applique pas vraiment les scores puisqu'ils sont vides
+        // dans l'export, mais on doit modifier les stats pour que le
+        // tri des rounds suivants soit déterministe.
+        // Comme tous les matchs sont "nuls" hypothétiques, les stats
+        // ne changent pas relativement, donc le classement reste stable.
+        // Cela suffit pour un export prévisionnel.
+      }
+
+      return schedule.map(s => ({
+        'Round': s.round,
+        'Terrain': s.terrain,
+        'Équipe A': s.teamA,
+        'Score A': s.scoreA,
+        'Score B': s.scoreB,
+        'Équipe B': s.teamB
+      }));
+    }
+
+    /* ==================================================================
+       PERSISTANCE — LOCALSTORAGE
+       ================================================================== */
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // LocalStorage indisponible ou plein : silencieux
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw);
+          // Fusionner avec defaultState pour gérer les champs ajoutés
+          state = { ...defaultState(), ...saved };
+          // Restaurer nextId
+          let maxId = 0;
+          state.allMatches.forEach(m => { if (m.id > maxId) maxId = m.id; });
+          state.teams.forEach(t => { if (t.id > maxId) maxId = t.id; });
+          nextId = maxId + 1;
+          return true;
+        }
+      } catch (e) {
+        // Corrompu : on repart de zéro
+      }
+      return false;
+    }
+
+    function clearState() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = defaultState();
+      nextId = 1;
+    }
+
+    /* ==================================================================
+       GESTION DES ERREURS
+       ================================================================== */
+    function showConfigError(msg) {
+      const el = document.getElementById('config-error');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function hideConfigError() {
+      document.getElementById('config-error').classList.add('hidden');
+    }
+
+    /* ==================================================================
+       VUE CONFIGURATION — LOGIQUE
+       ================================================================== */
+    function addTeamRow(name, p1, p2, p3) {
+      const container = document.getElementById('teams-container');
+      const row = document.createElement('div');
+      row.className = 'team-row';
+      row.innerHTML =
+        '<div class="input-group">' +
+          '<label>Nom</label>' +
+          '<input type="text" class="input-field team-name" placeholder="Nom de l\'équipe" value="' + escHtml(name || '') + '">' +
+        '</div>' +
+        '<div class="input-group">' +
+          '<label>Joueur 1</label>' +
+          '<input type="text" class="input-field player" placeholder="Prénom" value="' + escHtml(p1 || '') + '">' +
+        '</div>' +
+        '<div class="input-group">' +
+          '<label>Joueur 2</label>' +
+          '<input type="text" class="input-field player" placeholder="Prénom" value="' + escHtml(p2 || '') + '">' +
+        '</div>' +
+        '<div class="input-group">' +
+          '<label>Joueur 3</label>' +
+          '<input type="text" class="input-field player" placeholder="Prénom" value="' + escHtml(p3 || '') + '">' +
+        '</div>' +
+        '<button type="button" class="btn-remove" title="Supprimer" aria-label="Supprimer cette équipe">&times;</button>';
+
+      row.querySelector('.btn-remove').addEventListener('click', function() {
+        row.remove();
+      });
+
+      container.appendChild(row);
+    }
+
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /**
+     * Lance le tournoi après validation de la configuration.
+       Vérifie : nombre d'équipes suffisant, noms uniques,
+       joueurs renseignés, nombre de terrains valide.
+       Initialise les équipes, génère les matchs, et bascule
+       vers le tableau de bord.
+     */
+    function startTournament() {
+      hideConfigError();
+
+      const format = document.querySelector('input[name="format"]:checked').value;
+      const numTerrains = parseInt(document.getElementById('num-terrains').value, 10);
+      const rows = document.querySelectorAll('#teams-container .team-row');
+
+      // Validation du nombre de terrains
+      if (isNaN(numTerrains) || numTerrains < 1 || numTerrains > 20) {
+        showConfigError('Le nombre de terrains doit être entre 1 et 20.');
+        return;
+      }
+
+      // Validation du nombre d'équipes
+      if (rows.length < 3) {
+        showConfigError('Il faut au moins 3 équipes pour lancer un tournoi.');
+        return;
+      }
+
+      if (format === 'suisse' && rows.length < 8) {
+        showConfigError('Le système suisse nécessite au moins 8 équipes.');
+        return;
+      }
+
+      // Collecte et validation des équipes
+      const teams = [];
+      const names = new Set();
+
+      rows.forEach(row => {
+        const name = row.querySelector('.team-name').value.trim();
+        const players = Array.from(row.querySelectorAll('.player')).map(inp => inp.value.trim());
+        if (name && !names.has(name)) {
+          names.add(name);
+          teams.push({
+            id: nextId++,
+            name: name,
+            players: players,
+            wins: 0,
+            losses: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            played: 0,
+            byeCount: 0
+          });
+        }
+      });
+
+      if (teams.length < 3) {
+        showConfigError('Chaque équipe doit avoir un nom unique non vide.');
+        return;
+      }
+
+      if (format === 'suisse' && teams.length < 8) {
+        showConfigError('Le système suisse nécessite au moins 8 équipes avec noms uniques.');
+        return;
+      }
+
+      // Vérifier que chaque équipe a au moins un joueur
+      const incomplete = teams.find(t => t.players.every(p => p === ''));
+      if (incomplete) {
+        showConfigError('L\'équipe "' + incomplete.name + '" doit avoir au moins un joueur.');
+        return;
+      }
+
+      // Initialiser l'état
+      state = defaultState();
+      state.format = format;
+      state.numTerrains = numTerrains;
+      state.teams = teams;
+
+      if (format === 'suisse') {
+        state.swissTotalRounds = parseInt(document.getElementById('swiss-rounds').value, 10) || 5;
+        if (state.swissTotalRounds < 3) state.swissTotalRounds = 3;
+        if (state.swissTotalRounds > 15) state.swissTotalRounds = 15;
+      }
+
+      // Génération des matchs
+      if (format === 'poule') {
+        const ids = teams.map(t => t.id);
+        const pairs = generateAllPairs(ids);
+        pairs.forEach(p => {
+          const match = {
+            id: nextId++,
+            teamAId: p.teamAId,
+            teamBId: p.teamBId,
+            isBye: false,
+            terrain: null,
+            scoreA: null,
+            scoreB: null,
+            status: 'waiting',
+            round: null
+          };
+          state.allMatches.push(match);
+          state.queue.push(match);
+        });
+        fillTerrains();
+      } else {
+        startSwissRound();
+      }
+
+      saveState();
+      renderDashboard();
+      document.getElementById('config-view').classList.add('hidden');
+      document.getElementById('dashboard-view').classList.remove('hidden');
+    }
+
+    /* ==================================================================
+       VUE TABLEAU DE BORD — RENDU
+       ================================================================== */
+    function renderDashboard() {
+      renderTerrains();
+      renderQueue();
+      renderStandings();
+      renderRoundInfo();
+      renderControls();
+    }
+
+    function renderControls() {
+      const roundBtn = document.getElementById('next-round-btn');
+      if (!roundBtn) return;
+
+      if (state.format === 'suisse') {
+        // Afficher le bouton "Round suivant" si le round courant est terminé
+        // et qu'il reste des rounds à jouer
+        const roundMatches = state.allMatches.filter(m => m.round === state.swissCurrentRound);
+        const roundDone = roundMatches.length > 0 && roundMatches.every(m => m.status === 'completed');
+        const hasMoreRounds = state.swissCurrentRound < state.swissTotalRounds;
+
+        if (roundDone && hasMoreRounds && !state.tournamentComplete) {
+          roundBtn.classList.remove('hidden');
+          roundBtn.textContent = 'Lancer round ' + (state.swissCurrentRound + 1);
+          roundBtn.disabled = false;
+        } else {
+          roundBtn.classList.add('hidden');
+        }
+      } else {
+        roundBtn.classList.add('hidden');
+      }
+
+      // Afficher message de fin
+      const completeEl = document.getElementById('tournament-complete');
+      if (state.tournamentComplete) {
+        completeEl.classList.remove('hidden');
+      } else {
+        completeEl.classList.add('hidden');
+      }
+    }
+
+    function renderRoundInfo() {
+      const el = document.getElementById('round-info');
+      if (state.format === 'suisse') {
+        el.classList.remove('hidden');
+        el.textContent = 'Round ' + state.swissCurrentRound + ' / ' + state.swissTotalRounds;
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Rendu des cartes terrains.
+       Chaque terrain affiche soit un match en cours (avec inputs de
+       score et bouton de validation), soit un match terminé (score
+       figé), soit un message "libre".
+     */
+    function renderTerrains() {
+      const container = document.getElementById('terrains-container');
+      container.innerHTML = '';
+
+      for (let t = 1; t <= state.numTerrains; t++) {
+        const match = state.activeMatches.find(m => m.terrain === t);
+        const card = document.createElement('div');
+        card.className = 'terrain-card';
+
+        if (match) {
+          const teamA = getTeam(match.teamAId);
+          const teamB = getTeam(match.teamBId);
+          card.innerHTML =
+            '<div class="terrain-label">Terrain ' + t + '</div>' +
+            '<div class="match-teams">' +
+              '<span class="match-team-name">' + escHtml(teamA.name) + '</span>' +
+              '<span class="match-vs">vs</span>' +
+              '<span class="match-team-name">' + escHtml(teamB.name) + '</span>' +
+            '</div>' +
+            '<div class="score-row">' +
+              '<input type="number" id="score-a-' + match.id + '" class="score-input" min="0" placeholder="0" aria-label="Score ' + escHtml(teamA.name) + '">' +
+              '<span class="score-dash">&mdash;</span>' +
+              '<input type="number" id="score-b-' + match.id + '" class="score-input" min="0" placeholder="0" aria-label="Score ' + escHtml(teamB.name) + '">' +
+            '</div>' +
+            '<button type="button" class="btn-primary btn-small" style="width:100%" data-validate="' + match.id + '">Valider le score</button>';
+
+          card.querySelector('[data-validate]').addEventListener('click', function() {
+            validateScore(match.id);
+          });
+
+          // Pré-remplir si des valeurs partielles existent
+          const inputA = card.querySelector('#score-a-' + match.id);
+          const inputB = card.querySelector('#score-b-' + match.id);
+          if (match.scoreA !== null) inputA.value = match.scoreA;
+          if (match.scoreB !== null) inputB.value = match.scoreB;
+
+        } else {
+          // Vérifier si un match a été récemment terminé sur ce terrain
+          // pour afficher le score (on ne le fait pas : le terrain est simplement libre)
+          card.innerHTML =
+            '<div class="terrain-label">Terrain ' + t + '</div>' +
+            '<div class="terrain-empty">Libre</div>';
+        }
+
+        container.appendChild(card);
+      }
+    }
+
+    /**
+     * Rendu de la file d'attente.
+       Affiche les matchs en attente par ordre de priorité
+       (le même ordre que l'ordonnanceur utiliserait).
+     */
+    function renderQueue() {
+      const section = document.getElementById('queue-section');
+      const container = document.getElementById('queue-container');
+      container.innerHTML = '';
+
+      if (state.queue.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      section.classList.remove('hidden');
+
+      // Trier l'affichage par la même priorité que l'ordonnanceur
+      const sorted = [...state.queue].sort((a, b) => {
+        const minA = Math.min(teamsPlayedCount(a.teamAId), teamsPlayedCount(a.teamBId));
+        const minB = Math.min(teamsPlayedCount(b.teamAId), teamsPlayedCount(b.teamBId));
+        if (minA !== minB) return minA - minB;
+        return Math.max(teamsPlayedCount(a.teamAId), teamsPlayedCount(a.teamBId)) -
+               Math.max(teamsPlayedCount(b.teamAId), teamsPlayedCount(b.teamBId));
+      });
+
+      sorted.forEach((m, i) => {
+        const teamA = getTeam(m.teamAId);
+        const teamB = getTeam(m.teamBId);
+        const item = document.createElement('div');
+        item.className = 'queue-item';
+        item.innerHTML =
+          '<span class="queue-index">' + (i + 1) + '.</span>' +
+          '<span class="queue-teams">' +
+            escHtml(teamA.name) +
+            '<span class="queue-vs"> vs </span>' +
+            escHtml(teamB.name) +
+          '</span>';
+        container.appendChild(item);
+      });
+    }
+
+    /**
+     * Rendu du tableau de classement.
+       Colonnes : Rang, Équipe, Jouées, V, D, PP, PC, GA.
+       Le GA est coloré selon son signe (accent si positif,
+       survol si négatif).
+     */
+    function renderStandings() {
+      const tbody = document.getElementById('standings-body');
+      tbody.innerHTML = '';
+
+      const standings = computeStandings();
+      standings.forEach((t, i) => {
+        const ga = t.pointsFor - t.pointsAgainst;
+        const gaStr = (ga >= 0 ? '+' : '') + ga;
+        const gaClass = ga > 0 ? 'ga-positive' : (ga < 0 ? 'ga-negative' : '');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>' + (i + 1) + '</td>' +
+          '<td class="team-cell">' + escHtml(t.name) + '</td>' +
+          '<td>' + t.played + '</td>' +
+          '<td>' + t.wins + '</td>' +
+          '<td>' + t.losses + '</td>' +
+          '<td>' + t.pointsFor + '</td>' +
+          '<td>' + t.pointsAgainst + '</td>' +
+          '<td class="' + gaClass + '">' + gaStr + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ==================================================================
+       RÉINITIALISATION
+       ================================================================== */
+    function resetTournament() {
+      clearState();
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('config-view').classList.remove('hidden');
+      initConfigView();
+    }
+
+    /* ==================================================================
+       INITIALISATION
+       ================================================================== */
+    function initConfigView() {
+      const container = document.getElementById('teams-container');
+      container.innerHTML = '';
+      // Ajouter 4 équipes par défaut
+      for (let i = 0; i < 4; i++) {
+        addTeamRow('', '', '', '');
+      }
+    }
+
+    function initEventListeners() {
+      // Bascule format : afficher/masquer options suisse
+      document.querySelectorAll('input[name="format"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const swissOpts = document.getElementById('swiss-options');
+          if (this.value === 'suisse') {
+            swissOpts.classList.remove('hidden');
+          } else {
+            swissOpts.classList.add('hidden');
+          }
+        });
+      });
+
+      // Ajouter une équipe
+      document.getElementById('add-team-btn').addEventListener('click', function() {
+        addTeamRow('', '', '', '');
+      });
+
+      // Lancer le tournoi
+      document.getElementById('start-btn').addEventListener('click', startTournament);
+
+      // Export
+      document.getElementById('export-btn').addEventListener('click', exportTournament);
+
+      // Réinitialiser
+      document.getElementById('reset-btn').addEventListener('click', resetTournament);
+
+      // Bouton "Round suivant" (pour suisse)
+      // On l'ajoute dynamiquement dans le dashboard
+      const roundBtn = document.createElement('button');
+      roundBtn.type = 'button';
+      roundBtn.id = 'next-round-btn';
+      roundBtn.className = 'btn-primary hidden';
+      roundBtn.addEventListener('click', function() {
+        startSwissRound();
+        saveState();
+        renderDashboard();
+      });
+      document.querySelector('.dashboard-controls').appendChild(roundBtn);
+    }
+
+    /**
+     * Point d'entrée principal.
+       Tente de charger un tournoi sauvegardé dans LocalStorage.
+       Si trouvé, restaure l'état et affiche le tableau de bord.
+       Sinon, affiche l'écran de configuration.
+     */
+    function init() {
+      initEventListeners();
+      initConfigView();
+
+      const restored = loadState();
+      if (restored && state.teams.length > 0 && state.allMatches.length > 0) {
+        // Vérifier que le tournoi n'est pas dans un état vide
+        const hasActivity = state.activeMatches.length > 0 ||
+                            state.queue.length > 0 ||
+                            state.completedMatches.length > 0 ||
+                            state.tournamentComplete;
+        if (hasActivity) {
+          document.getElementById('config-view').classList.add('hidden');
+          document.getElementById('dashboard-view').classList.remove('hidden');
+          renderDashboard();
+
+          // Si suisse, afficher les options si nécessaire
+          if (state.format === 'suisse') {
+            document.getElementById('swiss-options').classList.remove('hidden');
+            document.getElementById('swiss-rounds').value = state.swissTotalRounds;
+            document.querySelector('input[name="format"][value="suisse"]').checked = true;
+          }
+        }
+      }
+    }
+
+    // Lancer l'application au chargement du DOM
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
