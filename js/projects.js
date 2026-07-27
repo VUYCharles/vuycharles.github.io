@@ -31,7 +31,7 @@ const projectsDB = [
   {
     id: "perso-2",
     title: "Dossier Locations",
-    tag: "automatisation",
+    tag: "Automatisation",
     date: "2026-07-27",
     statut: "actif",
     description: "À partir du dossier original, filigrane les documents pdfs pour chaque demande.",
