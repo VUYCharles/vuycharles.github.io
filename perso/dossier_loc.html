@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filigrane locatif — Prénom NOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Commit+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fond: #F2F5F4;
+      --carte: #E4EBE8;
+      --carte-survol: #F8FAFA;
+      --texte: #1E2D3A;
+      --brume: #8A9CA8;
+      --accent: #A4C4B4;
+      --secondaire: #A4B8CC;
+      --survol: #D4A89A;
+      --ombre-carte: 0 2px 8px rgba(30, 45, 58, 0.04);
+      --focus: #A4C4B4;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Commit Mono', monospace;
+      --padding-page: 40px;
+      --max-width: 1100px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fond: #131820;
+        --carte: #1A2130;
+        --carte-survol: #222C3A;
+        --texte: #E0E6E4;
+        --brume: #6E7E8A;
+        --accent: #B0A4C8;
+        --secondaire: #C8A0B0;
+        --survol: #D4A0B4;
+        --ombre-carte: 0 2px 8px rgba(0, 0, 0, 0.2);
+        --focus: #B0A4C8;
+      }
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      background-color: var(--fond);
+      color: var(--texte);
+      font-family: var(--font-sans);
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: none;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding-left: var(--padding-page);
+      padding-right: var(--padding-page);
+    }
+
+    /* Navigation */
+    nav {
+      padding-top: 32px;
+      padding-bottom: 32px;
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    nav a {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--brume);
+      padding: 4px 0;
+    }
+
+    nav a.active {
+      color: var(--texte);
+    }
+
+    nav a:not(.active):hover {
+      color: var(--survol);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    /* Retour */
+    .back {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      padding-top: 48px;
+    }
+
+    .back:hover {
+      color: var(--survol);
+    }
+
+    /* Titre */
+    .project-title {
+      font-family: var(--font-sans);
+      font-size: 40px;
+      font-weight: 500;
+      color: var(--texte);
+      letter-spacing: -0.5px;
+      max-width: 700px;
+      margin-top: 64px;
+    }
+
+    /* Métadonnées */
+    .project-meta {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--brume);
+      margin-top: 16px;
+    }
+
+    /* Description */
+    .project-description {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--texte);
+      line-height: 1.7;
+      max-width: 650px;
+      margin-top: 48px;
+    }
+
+    .project-description p + p {
+      margin-top: 16px;
+    }
+
+    /* Bloc technique */
+    .tech-block {
+      background-color: var(--carte);
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: var(--ombre-carte);
+      max-width: 500px;
+      margin-top: 64px;
+      margin-bottom: 80px;
+    }
+
+    .tech-line {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .tech-label {
+      color: var(--brume);
+    }
+
+    .tech-value {
+      color: var(--texte);
+    }
+
+    .tech-value a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .tech-value a:hover {
+      color: var(--survol);
+    }
+
+    /* Footer */
+    footer {
+      padding-top: 100px;
+      padding-bottom: 40px;
+    }
+
+    .footer-line {
+      width: 40px;
+      height: 1px;
+      background-color: var(--secondaire);
+      margin-bottom: 4px;
+    }
+
+    .footer-line:last-of-type {
+      margin-bottom: 24px;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy,
+    .footer-contact {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--brume);
+    }
+
+    .footer-contact:hover {
+      color: var(--survol);
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --padding-page: 24px;
+      }
+
+      nav a {
+        font-size: 14px;
+      }
+
+      .nav-links {
+        gap: 24px;
+      }
+
+      .project-title {
+        font-size: 32px;
+        margin-top: 48px;
+      }
+
+      .project-description {
+        font-size: 15px;
+        margin-top: 40px;
+      }
+
+      .tech-block {
+        padding: 24px;
+        margin-top: 48px;
+        margin-bottom: 60px;
+      }
+
+      footer {
+        padding-top: 48px;
+        padding-bottom: 24px;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <div class="nav-links">
+        <a href="../index.html" class="active">Projets</a>
+        <a href="../a-propos.html">À propos</a>
+        <a href="../contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <a href="../index.html" class="back">← Tous les projets</a>
+
+    <h1 class="project-title">Filigrane locatif</h1>
+    <p class="project-meta">python • 2026</p>
+
+    <div class="project-description">
+      <p>Outil en ligne de commande qui applique un filigrane personnalisé sur les documents d'un dossier de location. Le texte inclut le nom du destinataire et l'URL de l'annonce, ce qui lie chaque PDF à un contexte précis.</p>
+      <p>Les fichiers originaux restent intacts dans un dossier séparé. Le script produit une copie filigranée dans un dossier nommé d'après le destinataire, prête à l'envoi.</p>
+    </div>
+
+    <div class="tech-block">
+      <div class="tech-line"><span class="tech-label">Langage : </span><span class="tech-value">Python 3</span></div>
+      <div class="tech-line"><span class="tech-label">Dépendances : </span><span class="tech-value">pypdf, reportlab, click</span></div>
+      <div class="tech-line"><span class="tech-label">Interface : </span><span class="tech-value">CLI</span></div>
+      <div class="tech-line"><span class="tech-label">Usage : </span><span class="tech-value">dossier original → sortie filigranée</span></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-line"></div>
+      <div class="footer-line"></div>
+      <div class="footer-content">
+        <span class="footer-copy">© 2026 — Vuycharles</span>
+        <a href="../contact.html" class="footer-contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
