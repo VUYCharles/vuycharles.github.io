@@ -28,21 +28,19 @@ const projectsDB = [
     categorie: "perso"  // ou "mcta"
   },
 
-  // {
-    // id: "perso-1",
-    // title: "Outil de planification",
-    // tag: "automatisation",
-    // date: "2026-05-10",
-    // statut: "actif",
-    // description: "Application de visualisation des créneaux pour la gestion de planning. Interface sobre et rapide, conçue pour un usage quotidien.",
-    // tech: {
-    //   Langage: "Python",
-    //   Framework: "FastAPI",
-    //   Base: "PostgreSQL",
-    //   Lien: "https://github.com/exemple/planning"
-    // },
-    // categorie: "perso"
-  // },
+  {
+    id: "perso-2",
+    title: "Dossier Locations",
+    tag: "automatisation",
+    date: "2026-07-27",
+    statut: "actif",
+    description: "À partir du dossier original, filigrane les documents pdfs pour chaque demande.",
+    tech: {
+      Langage: "Python",
+      Lien: "perso/dossier_loc.html"
+    },
+    categorie: "perso"
+  },
 //  {
 //     id: "perso-2",
 //     title: "Parser météo aéro",
