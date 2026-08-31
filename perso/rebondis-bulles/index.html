@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rebondis Bulles — Vuycharles</title>
+<meta name="description" content="Puzzle de glissade sur grille 16 × 16, jouable au doigt, avec solveur optimal intégré.">
+
+<meta name="theme-color" content="#F2F5F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1025" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="application-name" content="Rebondis Bulles">
+<meta name="apple-mobile-web-app-title" content="Rebondis Bulles">
+
+<link rel="icon" type="image/svg+xml" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<link rel="manifest" href="manifest.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Commit+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <nav class="nav chrome" aria-label="Navigation principale">
+    <a href="../../index.html" class="actif">Projets</a>
+    <a href="../../mcta.html">MCTA</a>
+    <a href="../../a-propos.html">À propos</a>
+    <a href="../../contact.html">Contact</a>
+  </nav>
+
+  <a href="../../index.html" class="retour chrome">← Tous les projets</a>
+
+  <div class="entete-app">
+    <span class="nom">Rebondis Bulles</span>
+    <span class="partie">17 jetons</span>
+  </div>
+
+  <div class="chrome">
+    <h1 class="titre-projet">Rebondis Bulles</h1>
+    <p class="meta">jeu • 2026 • actif</p>
+
+    <p class="description">Quatre bulles filent en ligne droite jusqu'au premier
+    obstacle : un mur, le bloc central, ou une autre bulle. Un jeton désigne la
+    bulle à poser et la case à atteindre. Elle doit s'y arrêter, pas seulement y
+    passer.</p>
+    <p class="description">Une partie enchaîne les 17 jetons du paquet sans
+    remise. Les bulles ne sont jamais replacées : chaque manche part de la
+    position laissée par la précédente, et c'est le joueur qui, coup après coup,
+    façonne les puzzles qu'il devra résoudre ensuite.</p>
+  </div>
+
+  <div class="jeu">
+
+    <div class="bloc bloc-etat">
+      <div class="jeton-affiche">
+        <span id="vignette" class="vignette" aria-hidden="true"></span>
+        <span id="libelle-jeton" class="libelle"></span>
+      </div>
+      <div class="compteurs">
+        <div class="compteur"><span id="manche" class="valeur">1/17</span><span class="label">manche</span></div>
+        <div class="compteur"><span id="coups" class="valeur">0</span><span class="label">coups</span></div>
+        <div class="compteur"><span id="objectif" class="valeur">…</span><span class="label">objectif</span></div>
+        <div class="compteur"><span id="temps" class="valeur">00:00</span><span class="label">temps</span></div>
+      </div>
+    </div>
+
+    <div class="zone-plateau">
+      <div id="plateau" class="plateau" aria-label="Plateau 16 par 16"></div>
+    </div>
+
+    <div class="bloc bloc-commandes">
+      <p id="message" class="message"></p>
+      <div id="recap" class="recap" hidden></div>
+
+      <div class="ligne ligne-selection" style="margin-top: 24px;">
+        <span>Bulle sélectionnée</span>
+        <span id="selection" class="valeur">Rouge</span>
+      </div>
+
+      <div class="pave">
+        <span class="vide"></span>
+        <button type="button" data-direction="haut" aria-label="Lancer vers le haut">↑</button>
+        <span class="vide"></span>
+        <button type="button" data-direction="gauche" aria-label="Lancer vers la gauche">←</button>
+        <button type="button" data-direction="bas" aria-label="Lancer vers le bas">↓</button>
+        <button type="button" data-direction="droite" aria-label="Lancer vers la droite">→</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="annuler">Annuler</button>
+        <button type="button" id="rejouer">Rejouer</button>
+        <button type="button" id="solution">Montrer la solution</button>
+        <button type="button" id="suivante" class="btn-principal">Manche suivante</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bloc-technique chrome">
+    <div class="tech-line"><span class="tech-label">Stack :</span><span class="tech-value">HTML, CSS, JavaScript</span></div>
+    <div class="tech-line"><span class="tech-label">Moteur :</span><span class="tech-value">glissade et collisions, sans dépendance</span></div>
+    <div class="tech-line"><span class="tech-label">Solveur :</span><span class="tech-value">A* canonique, heuristique relâchée</span></div>
+    <div class="tech-line"><span class="tech-label">Calcul :</span><span class="tech-value">Web Worker, optimal exact ≤ 13 coups</span></div>
+    <div class="tech-line"><span class="tech-label">Plateau :</span><span class="tech-value">16 × 16, 17 coins, 17 jetons</span></div>
+    <div class="tech-line"><span class="tech-label">Hors ligne :</span><span class="tech-value">PWA installable, service worker</span></div>
+    <!-- Décommenter en remplaçant par l'URL réelle du dépôt :
+    <div class="tech-line"><span class="tech-label">Source :</span><span class="tech-value"><a href="https://github.com/VUYCharles/NOM-DU-DEPOT">github.com/VUYCharles/NOM-DU-DEPOT</a></span></div>
+    -->
+  </div>
+
+  <footer class="footer chrome">
+    <div class="footer-line"></div>
+    <div class="footer-line"></div>
+    <div class="footer-contenu">
+      <span>© 2026 — Vuycharles</span>
+      <a href="../../contact.html">Contact</a>
+    </div>
+  </footer>
+
+</div>
+
+<script src="moteur.js"></script>
+<script src="interface.js"></script>
+</body>
+</html>

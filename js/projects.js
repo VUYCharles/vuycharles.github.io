@@ -15,6 +15,21 @@
 
 const projectsDB = [
   // ----- PROJETS PERSONNELS -----
+  {
+    id: "perso-3",
+    title: "Rebondis Bulles",
+    tag: "Jeu, WebAPP",
+    date: "2026-08-31",
+    statut: "actif",
+    description: "Puzzle de glissade sur grille 16 × 16 : les bulles filent en ligne droite jusqu'au premier obstacle. Solveur A* intégré qui calcule l'optimum exact jusqu'à 13 coups. Jouable au doigt, installable comme application.",
+    tech: {
+      Langage: "HTML - CSS - JS",
+      Solveur: "A* dans un Web Worker",
+      Lien: "perso/rebondis-bulles/index.html"
+    },
+    categorie: "perso"
+  },
+
   { id: "perso-1",
     title: "Tournois de Pétanque",
     tag: "WebAPP",
