@@ -2,8 +2,6 @@
 
 Puzzle de glissade 16 × 16, jouable au doigt, installable comme application.
 
-## Fichiers
-
 | Fichier | Rôle |
 |---|---|
 | `index.html` | la page (projet du portfolio + application) |
@@ -14,25 +12,7 @@ Puzzle de glissade 16 × 16, jouable au doigt, installable comme application.
 | `sw.js` | service worker (hors ligne) |
 | `manifest.webmanifest`, `icone*.svg` | installation sur l'écran d'accueil |
 
-## Mise en ligne
-
-Le service worker et le Worker exigent **http(s)** : en ouvrant `index.html`
-depuis le disque (`file://`), le jeu fonctionne mais sans hors-ligne, et le
-calcul de l'objectif retombe sur le fil principal.
-
-En local :
-
-```
-python3 -m http.server 8000
-```
-
-puis `http://localhost:8000/`.
-
-## À chaque livraison
-
-Incrémenter `CACHE` dans `sw.js` (`bulles-v1` → `bulles-v2`). Sans ça, les
-appareils qui ont déjà visité le site continueront de servir l'ancienne
-version depuis leur cache.
+#*
 
 ## Le solveur
 
