@@ -27,43 +27,58 @@
      Disposition propre au projet.
      ----------------------------------------------------------------------- */
   var JETONS = [
-    { x: 2,  y: 1,  couleur: 'bleu',   forme: 'carre',    murs: ['bottom', 'right'] },
-    { x: 6,  y: 2,  couleur: 'vert',   forme: 'triangle', murs: ['bottom', 'left']  },
-    { x: 1,  y: 5,  couleur: 'jaune',  forme: 'etoile',   murs: ['top', 'right']    },
-    { x: 4,  y: 6,  couleur: 'rouge',  forme: 'cercle',   murs: ['top', 'left']     },
-    { x: 10, y: 1,  couleur: 'rouge',  forme: 'triangle', murs: ['bottom', 'left']  },
-    { x: 13, y: 3,  couleur: 'jaune',  forme: 'cercle',   murs: ['top', 'left']     },
-    { x: 9,  y: 5,  couleur: 'bleu',   forme: 'etoile',   murs: ['top', 'right']    },
-    { x: 14, y: 6,  couleur: 'vert',   forme: 'carre',    murs: ['bottom', 'right'] },
-    { x: 2,  y: 9,  couleur: 'vert',   forme: 'cercle',   murs: ['top', 'right']    },
-    { x: 5,  y: 11, couleur: 'bleu',   forme: 'triangle', murs: ['bottom', 'left']  },
-    { x: 1,  y: 13, couleur: 'rouge',  forme: 'etoile',   murs: ['top', 'left']     },
-    { x: 6,  y: 14, couleur: 'jaune',  forme: 'carre',    murs: ['top', 'right']    },
-    { x: 11, y: 9,  couleur: 'jaune',  forme: 'triangle', murs: ['bottom', 'right'] },
-    { x: 9,  y: 12, couleur: 'rouge',  forme: 'carre',    murs: ['top', 'left']     },
-    { x: 14, y: 11, couleur: 'bleu',   forme: 'cercle',   murs: ['bottom', 'left']  },
-    { x: 12, y: 14, couleur: 'vert',   forme: 'etoile',   murs: ['top', 'right']    },
-    { x: 7,  y: 4,  couleur: 'vortex', forme: 'vortex',   murs: ['bottom', 'right'] }
+    { x: 2,  y: 1,  couleur: 'bleu',   forme: 'carre' },
+    { x: 6,  y: 2,  couleur: 'vert',   forme: 'triangle'  },
+    { x: 1,  y: 5,  couleur: 'jaune',  forme: 'etoile'    },
+    { x: 4,  y: 6,  couleur: 'rouge',  forme: 'cercle'     },
+    { x: 10, y: 1,  couleur: 'rouge',  forme: 'triangle'  },
+    { x: 13, y: 3,  couleur: 'jaune',  forme: 'cercle'     },
+    { x: 9,  y: 5,  couleur: 'bleu',   forme: 'etoile'    },
+    { x: 14, y: 6,  couleur: 'vert',   forme: 'carre' },
+    { x: 2,  y: 9,  couleur: 'vert',   forme: 'cercle'    },
+    { x: 5,  y: 11, couleur: 'bleu',   forme: 'triangle'  },
+    { x: 1,  y: 13, couleur: 'rouge',  forme: 'etoile'     },
+    { x: 6,  y: 14, couleur: 'jaune',  forme: 'carre'    },
+    { x: 11, y: 9,  couleur: 'jaune',  forme: 'triangle' },
+    { x: 9,  y: 12, couleur: 'rouge',  forme: 'carre'     },
+    { x: 14, y: 11, couleur: 'bleu',   forme: 'cercle'  },
+    { x: 12, y: 14, couleur: 'vert',   forme: 'etoile'    },
+    { x: 7,  y: 4,  couleur: 'vortex', forme: 'vortex' }
   ];
 
-  /* Murs de rebond ancrés aux bords : un segment d'une seule case, qui donne
-     un point d'arrêt près du bord sans cloisonner la ligne entière. */
-  var MURS_BORDS = [
-    { x: 4,  y: 0,  cote: 'right' },
-    { x: 11, y: 0,  cote: 'right' },
-    { x: 14, y: 1,  cote: 'right' },
-    { x: 4,  y: 15, cote: 'right' },
-    { x: 10, y: 15, cote: 'right' },
-    { x: 1,  y: 15, cote: 'right' },
-    { x: 0,  y: 4,  cote: 'bottom' },
-    { x: 0,  y: 11, cote: 'bottom' },
-    { x: 0,  y: 7,  cote: 'bottom' },
-    { x: 15, y: 4,  cote: 'bottom' },
-    { x: 15, y: 11, cote: 'bottom' },
-    { x: 15, y: 8,  cote: 'bottom' }
+  /* Ancrages des murs de rebond : un mur d'une case, perpendiculaire au bord,
+     posé à un décalage tiré au sort dans sa plage. Les plages sont disjointes
+     pour que les murs ne se massent pas au même endroit. */
+  var ANCRAGES_BORDS = [
+    { bord: 'haut',   plage: [2, 5] },
+    { bord: 'haut',   plage: [9, 13] },
+    { bord: 'bas',    plage: [1, 5] },
+    { bord: 'bas',    plage: [9, 13] },
+    { bord: 'gauche', plage: [2, 5] },
+    { bord: 'gauche', plage: [9, 13] },
+    { bord: 'droite', plage: [2, 5] },
+    { bord: 'droite', plage: [9, 13] }
+  ];
+
+  /* Les quatre orientations possibles d'un coin en "L". */
+  var COINS = [
+    ['top', 'left'], ['top', 'right'], ['bottom', 'left'], ['bottom', 'right']
   ];
 
   var COTE_VERS_DIR = { top: 'haut', right: 'droite', bottom: 'bas', left: 'gauche' };
+
+  /* Générateur reproductible : la même graine redonne exactement le même
+     plateau. Indispensable, car le solveur tourne dans un Worker qui
+     reconstruit le plateau de son côté. */
+  function melangeur(graine) {
+    var a = (graine >>> 0) || 1;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
 
   function index(x, y) { return y * TAILLE + x; }
   function colonne(p) { return p % TAILLE; }
@@ -78,13 +93,54 @@
     }
   }
 
-  /* Construit le plateau. Appelé une seule fois : il ne change plus ensuite. */
-  function creerPlateau() {
+  function nombreMurs(c) {
+    return (c.top ? 1 : 0) + (c.right ? 1 : 0) + (c.bottom ? 1 : 0) + (c.left ? 1 : 0);
+  }
+
+  /* Un mur est refusé s'il porte une case — ou sa voisine — à trois côtés
+     fermés. Sur quatre côtés, trois murs sont forcément consécutifs : c'est
+     le "U" dont on ne veut pas, une impasse à sortie unique. */
+  function murAcceptable(cellules, x, y, cote) {
+    var c = cellules[index(x, y)];
+    if (c[cote]) return true;
+    if (nombreMurs(c) >= 2) return false;
+    var d = DIRECTIONS[COTE_VERS_DIR[cote]];
+    var nx = x + d.dx, ny = y + d.dy;
+    if (nx >= 0 && ny >= 0 && nx < TAILLE && ny < TAILLE) {
+      var v = cellules[index(nx, ny)];
+      if (!v[d.oppose] && nombreMurs(v) >= 2) return false;
+    }
+    return true;
+  }
+
+  function melanger(liste, rng) {
+    var copie = liste.slice();
+    for (var i = copie.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var t = copie[i]; copie[i] = copie[j]; copie[j] = t;
+    }
+    return copie;
+  }
+
+  /* Construit le plateau pour une graine donnée. Les emplacements des jetons
+     sont fixes — ils sont répartis par quadrant — mais l'orientation de leur
+     coin et la position des murs de bord sont tirées au sort. */
+  function creerPlateau(graine) {
+    for (var essai = 0; essai < 40; essai++) {
+      var resultat = tenterPlateau(melangeur((graine >>> 0) + essai * 7919));
+      if (resultat) { resultat.graine = graine >>> 0; return resultat; }
+    }
+    /* Repli : orientations imposées, jamais atteint en pratique. */
+    return tenterPlateau(melangeur(1), true);
+  }
+
+  function tenterPlateau(rng, force) {
     var cellules = [];
     for (var i = 0; i < TAILLE * TAILLE; i++) {
       cellules.push({ top: false, right: false, bottom: false, left: false, bloquee: false });
     }
 
+    /* Bords extérieurs. */
     for (var k = 0; k < TAILLE; k++) {
       cellules[index(k, 0)].top = true;
       cellules[index(k, TAILLE - 1)].bottom = true;
@@ -92,6 +148,7 @@
       cellules[index(TAILLE - 1, k)].right = true;
     }
 
+    /* Bloc central infranchissable et son pourtour. */
     CENTRE.forEach(function (c) { cellules[index(c[0], c[1])].bloquee = true; });
     CENTRE.forEach(function (c) {
       NOMS_DIRECTIONS.forEach(function (nom) {
@@ -102,13 +159,62 @@
       });
     });
 
-    JETONS.forEach(function (jeton) {
-      jeton.murs.forEach(function (cote) { poserMur(cellules, jeton.x, jeton.y, cote); });
-    });
+    /* Murs de bord : décalage tiré au sort dans la plage de l'ancrage. */
+    for (var a = 0; a < ANCRAGES_BORDS.length; a++) {
+      var ancrage = ANCRAGES_BORDS[a];
+      var offsets = melanger(plage(ancrage.plage), rng);
+      var pose = false;
+      for (var o = 0; o < offsets.length && !pose; o++) {
+        var m = murDeBord(ancrage.bord, offsets[o]);
+        if (murAcceptable(cellules, m.x, m.y, m.cote)) {
+          poserMur(cellules, m.x, m.y, m.cote);
+          pose = true;
+        }
+      }
+      if (!pose && !force) return null;
+    }
 
-    MURS_BORDS.forEach(function (m) { poserMur(cellules, m.x, m.y, m.cote); });
+    /* Coins des jetons : une orientation sur quatre, tirée au sort parmi
+       celles qui ne referment pas une case sur trois côtés. */
+    var jetons = [];
+    for (var j = 0; j < JETONS.length; j++) {
+      var jeton = JETONS[j];
+      var choix = melanger(COINS, rng);
+      var retenu = null;
+      for (var c2 = 0; c2 < choix.length && !retenu; c2++) {
+        if (murAcceptable(cellules, jeton.x, jeton.y, choix[c2][0]) &&
+            murAcceptable(cellules, jeton.x, jeton.y, choix[c2][1])) {
+          retenu = choix[c2];
+        }
+      }
+      if (!retenu) {
+        if (!force) return null;
+        retenu = COINS[0];
+      }
+      poserMur(cellules, jeton.x, jeton.y, retenu[0]);
+      poserMur(cellules, jeton.x, jeton.y, retenu[1]);
+      jetons.push({
+        x: jeton.x, y: jeton.y, couleur: jeton.couleur, forme: jeton.forme, murs: retenu
+      });
+    }
 
-    return { taille: TAILLE, cellules: cellules, jetons: JETONS.slice() };
+    var plateau = { taille: TAILLE, cellules: cellules, jetons: jetons };
+    if (!force && casesIsolees(plateau).length) return null;
+    return plateau;
+  }
+
+  function plage(bornes) {
+    var liste = [];
+    for (var i = bornes[0]; i <= bornes[1]; i++) liste.push(i);
+    return liste;
+  }
+
+  /* Un mur de bord est perpendiculaire à son bord et long d'une seule case. */
+  function murDeBord(bord, decalage) {
+    if (bord === 'haut')   return { x: decalage, y: 0, cote: 'right' };
+    if (bord === 'bas')    return { x: decalage, y: TAILLE - 1, cote: 'right' };
+    if (bord === 'gauche') return { x: 0, y: decalage, cote: 'bottom' };
+    return { x: TAILLE - 1, y: decalage, cote: 'bottom' };
   }
 
   /* -----------------------------------------------------------------------
@@ -396,6 +502,15 @@
     return isolees;
   }
 
+  /* Contrôle : aucune case jouable ne doit être fermée sur trois côtés. */
+  function casesTroisMurs(plateau) {
+    var liste = [];
+    plateau.cellules.forEach(function (c, i) {
+      if (!c.bloquee && nombreMurs(c) >= 3) liste.push(i);
+    });
+    return liste;
+  }
+
   var API = {
     TAILLE: TAILLE,
     COULEURS: COULEURS,
@@ -413,7 +528,9 @@
     placerBulles: placerBulles,
     melangerPaquet: melangerPaquet,
     dejaPose: dejaPose,
-    casesIsolees: casesIsolees
+    casesIsolees: casesIsolees,
+    casesTroisMurs: casesTroisMurs,
+    melangeur: melangeur
   };
 
   global.MoteurBulles = API;

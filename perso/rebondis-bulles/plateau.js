@@ -12,11 +12,9 @@
   var COTE = CASE * M.TAILLE;          // 192
   var MARGE = 2;                       // bord de la case autour d'une bulle
   var REBOND = 2;                      // profondeur du rebond, en pixels
-  var MS_BASE = 50;                    // socle de durée
-  var MS_PAR_CASE = 18;                // allongement par case parcourue
-  var MS_MIN = 85, MS_MAX = 280;
+  var MS_PAR_CASE = 20;                // vitesse : la bulle file à cadence fixe
+  var MS_MIN = 60, MS_MAX = 340;
   var MS_REBOND = 70;
-  var ELAN = 0.45;                     // part d'inertie dans la courbe (0 = vitesse constante)
 
   /* Sprites 8 × 8. '#' = pixel plein. */
   var SPRITES = {
@@ -191,14 +189,11 @@
       var t = Date.now() - anim.debut;
       var dep = { x: M.colonne(anim.depuis) * CASE + MARGE, y: M.ligne(anim.depuis) * CASE + MARGE };
       if (t < anim.glisse) {
-        /* La bulle part d'un coup — l'impulsion de la décision — puis se
-           laisse légèrement porter par son inertie. Mélange de vitesse
-           constante et d'amorti : elle démarre à ~1,45 fois la vitesse
-           moyenne et percute encore à ~0,55, donc le choc reste franc.
-           Un amorti pur la ferait mourir avant l'obstacle. */
-        var u = t / anim.glisse;
-        var amorti = 1 - (1 - u) * (1 - u);
-        var k = (1 - ELAN) * u + ELAN * amorti;
+        /* Vitesse rigoureusement constante, du départ à l'impact : aucune
+           courbe d'entrée ni de sortie. L'œil suit une vitesse uniforme bien
+           mieux qu'une courbe, et un long trajet dure visiblement plus
+           longtemps qu'un court — la distance reste lisible. */
+        var k = t / anim.glisse;
         px = dep.x + (px + anim.dx * REBOND - dep.x) * k;
         py = dep.y + (py + anim.dy * REBOND - dep.y) * k;
       } else {
@@ -302,6 +297,12 @@
       }
     },
 
+    /* Le plateau change à chaque partie : ses murs sont tirés au sort. */
+    definirPlateau: function (nouveau) {
+      plateau = nouveau;
+      if (ctx) dessiner();
+    },
+
     definirEtat: function (nouvel) {
       if (!ctx) return;
       etat.positions = nouvel.positions.slice();
@@ -319,7 +320,7 @@
       var d = DECALAGES[direction];
       var cases = Math.abs(M.colonne(vers) - M.colonne(depuis)) +
                   Math.abs(M.ligne(vers) - M.ligne(depuis));
-      var glisse = Math.max(MS_MIN, Math.min(MS_MAX, MS_BASE + cases * MS_PAR_CASE));
+      var glisse = Math.max(MS_MIN, Math.min(MS_MAX, cases * MS_PAR_CASE));
       anim = {
         bulle: bulle, depuis: depuis, vers: vers,
         dx: d.dx, dy: d.dy,

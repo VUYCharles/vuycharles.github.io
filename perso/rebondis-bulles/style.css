@@ -243,6 +243,36 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 
 .recap { margin-top: 24px; }
 
+/* Champ de saisie du pseudo, au gabarit du formulaire de contact du site. */
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.champ span {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--brume);
+}
+
+.champ input {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--texte);
+  background-color: var(--carte-survol);
+  border: 1px solid var(--fond);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  transition: none;
+}
+
+.champ input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
 /* -------------------------------------------------------- BOUTONS --- */
 
 button {
