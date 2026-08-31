@@ -211,7 +211,7 @@
       ? 'Fais glisser une bulle dans une direction.'
       : 'Choisis une bulle, puis lance-la avec les flèches.';
   }
-
+/*
   function rejouerManche() {
     if (jeu.terminee || manche.close) return;
     jeu.positions = jeu.departManche.slice();
@@ -233,7 +233,37 @@
     message('Coup annulé.');
     sauvegarder();
   }
+*/
 
+function rejouerManche() {
+    if (jeu.terminee || manche.close) return;
+    jeu.positions = jeu.departManche.slice();
+    jeu.coups = 0;
+    jeu.historique = [];
+    jeu.etapeSolution = 0;
+    
+    // NOUVEAU : On redébloque la partie
+    jeu.resolu = false;
+    
+    afficher();
+    message('Position de départ de la manche rétablie.');
+    sauvegarder();
+  }
+
+  function annuler() {
+    if (!jeu.historique.length || jeu.terminee || manche.close) return;
+    var avant = jeu.historique.pop();
+    jeu.positions = avant.positions;
+    jeu.selection = avant.selection;
+    jeu.coups--;
+    
+    // NOUVEAU : On redébloque la partie si on avait gagné
+    jeu.resolu = false;
+    
+    afficher();
+    message('Coup annulé.');
+    sauvegarder();
+  }
   function mancheSuivante() {
     if (!jeu.resolu) return;
     if (!rapide()) {
@@ -354,7 +384,8 @@
     /* La solution n'est proposée que si le joueur n'a rien produit dans la
        minute, ou s'il a trouvé l'optimum. Une réponse perfectible a déjà eu
        sa chance : la partie enchaîne. */
-    jeu.solutionOuverte = (verdict !== 'partiel');
+    /* jeu.solutionOuverte = (verdict !== 'partiel'); */
+    jeu.solutionOuverte = true;
     afficher();
     sauvegarder();
   }
@@ -368,11 +399,15 @@
     jeu.terminee = true;
     suspendreMinuteurManche();
     arreterChrono();
+    
+    // NOUVEAU : Demander le pseudo
+    var pseudoJoueur = prompt("Partie terminée ! Entrez votre pseudo pour le classement :", "Joueur") || "Anonyme";
 
     if (rapide()) {
       /* Une manche interrompue n'est ni comptée ni chronométrée : elle ne
          doit pas dégrader la cadence de la partie. */
       var score = {
+        pseudo: pseudoJoueur, // Ajout du pseudo
         date: Date.now(),
         manches: jeu.manchesJouees,
         points: Math.round(jeu.points * 100) / 100,
@@ -384,6 +419,7 @@
       afficherRecapRapide(score);
     } else {
       var s = {
+        pseudo: pseudoJoueur, // Ajout du pseudo
         date: Date.now(),
         coups: jeu.totalCoups,
         optimal: jeu.totalOptimal,
@@ -575,10 +611,11 @@
     var meilleurs = lire(CLE_SCORES);
     if (meilleurs.length > 1) {
       l.push('<div class="separateur"></div>');
-      meilleurs.forEach(function (s, i) {
-        l.push(ligne((i + 1) + '. ' + new Date(s.date).toLocaleDateString('fr-FR'),
-          s.coups + ' coups · ' + duree(s.temps)));
-      });
+        meilleurs.forEach(function (s, i) {
+                var nomAffiche = s.pseudo ? s.pseudo : 'Anonyme';
+                l.push(ligne((i + 1) + '. ' + nomAffiche + ' (' + new Date(s.date).toLocaleDateString('fr-FR') + ')',
+                  s.coups + ' coups · ' + duree(s.temps)));
+              });
     }
     el.recap.innerHTML = l.join('');
     el.recap.hidden = false;
@@ -595,11 +632,13 @@
     var classement = lire(CLE_CLASSEMENT);
     if (classement.length) {
       l.push('<div class="separateur"></div>');
-      classement.forEach(function (s, i) {
-        l.push(ligne((i + 1) + '. ' + new Date(s.date).toLocaleDateString('fr-FR') +
-          (s.date === score.date ? ' — cette partie' : ''),
-          s.taux.toFixed(2) + ' pts/min · ' + s.manches + ' manches'));
-      });
+        classement.forEach(function (s, i) {
+                // NOUVEAU : Ajout du pseudo devant la date
+                var nomAffiche = s.pseudo ? s.pseudo : 'Anonyme';
+                l.push(ligne((i + 1) + '. ' + nomAffiche + ' (' + new Date(s.date).toLocaleDateString('fr-FR') + ')' +
+                  (s.date === score.date ? ' — actuel' : ''),
+                  s.taux.toFixed(2) + ' pts/min · ' + s.manches + ' manches'));
+              });
     }
     el.recap.innerHTML = l.join('');
     el.recap.hidden = false;
@@ -680,11 +719,34 @@
       resolu: jeu.resolu
     };
   }
-
+/*
   function majCompteurs() {
     el.manche.textContent = rapide() ? jeu.manche : jeu.manche + '/' + MANCHES_CLASSIQUE;
     el.coups.textContent = jeu.coups;
+    // NOUVEAU : On cache l'objectif si aucune réponse n'a été soumise et que la manche est en cours
+    var cacherObjectif = jeu.optimal === null || (jeu.meilleurCoups === null && !jeu.resolu);
+    el.objectif.textContent = cacherObjectif ? '…' : (jeu.optimal < 0 ? '13+' : jeu.optimal);
+    
     el.objectif.textContent = jeu.optimal === null ? '…' : (jeu.optimal < 0 ? '13+' : jeu.optimal);
+
+    if (rapide()) {
+      el.restant.textContent = Math.ceil((manche.close ? 0 : resteManche()) / 1000) + ' s';
+      el.points.textContent = jeu.points.toFixed(2);
+      el.taux.textContent = cadence().toFixed(2);
+    } else {
+      afficherChrono();
+    }
+  }*/
+  
+  function majCompteurs() {
+    el.manche.textContent = rapide() ? jeu.manche : jeu.manche + '/' + MANCHES_CLASSIQUE;
+    el.coups.textContent = jeu.coups;
+    
+    // NOUVEAU : On cache l'objectif si aucune réponse n'a été soumise et que la manche est en cours
+    var cacherObjectif = jeu.optimal === null || (jeu.meilleurCoups === null && !jeu.resolu);
+    el.objectif.textContent = cacherObjectif ? '…' : (jeu.optimal < 0 ? '13+' : jeu.optimal);
+    
+    // SUPPRIME LA LIGNE QUI ÉTAIT ICI !
 
     if (rapide()) {
       el.restant.textContent = Math.ceil((manche.close ? 0 : resteManche()) / 1000) + ' s';
