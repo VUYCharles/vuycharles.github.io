@@ -229,6 +229,7 @@
     jeu.verdict = null;
     jeu.selection = bulleParDefaut();
     manche.close = false;
+    coupEnFile = null;
 
     demarrerMinuteurManche(0);
     demanderObjectif();
@@ -286,8 +287,14 @@
 
   /* --------------------------------------------------- DÉPLACEMENT --- */
 
+  var coupEnFile = null;
+
+  /* Un coup demandé pendant une course n'est pas perdu : il est mis en file
+     et part à l'instant exact où la course s'achève. C'est ce qui permet
+     d'enchaîner sans temps mort. */
   function deplacer(direction) {
     if (jeu.resolu || jeu.terminee || manche.close) return;
+    if (PlateauPixel.enMouvement()) { coupEnFile = direction; return; }
     var arrivee = M.glisserPosition(plateau, jeu.positions, jeu.selection, direction);
     if (arrivee === jeu.positions[jeu.selection]) return;
 
@@ -315,6 +322,8 @@
       jeu.positionsSuivantes = jeu.positions.slice();
       suspendreMinuteurManche();
       vibrer([10, 60, 10]);
+      if (!jeu.assistee && jeu.optimal > 0 && jeu.coups === jeu.optimal) Sons.optimal();
+      else Sons.reussite();
       var texte = 'Manche ' + jeu.manche + ' résolue en ' + jeu.coups + ' coup' +
         (jeu.coups > 1 ? 's' : '') + '. ';
       if (jeu.assistee) texte += 'Solution consultée.';
@@ -331,6 +340,7 @@
     /* Mode rapide : la réponse est enregistrée, mais la manche reste ouverte
        tant que la minute n'est pas écoulée — le joueur peut viser mieux. */
     jeu.revele = true;
+    Sons.reussite();
     if (jeu.meilleurCoups === null || jeu.coups < jeu.meilleurCoups) {
       jeu.meilleurCoups = jeu.coups;
       jeu.meilleuresPositions = jeu.positions.slice();
@@ -366,6 +376,7 @@
     if (manche.close) return;
     manche.close = true;
     jeu.resolu = true;
+    coupEnFile = null;
     jeu.revele = true;
     jeu.verdict = verdict;
     suspendreMinuteurManche();
@@ -376,18 +387,21 @@
 
     var gagnes = 0;
     if (verdict === 'optimal') {
+      Sons.optimal();
       /* Point plein, plus un bonus au prorata du temps gagné sur la minute. */
       gagnes = 1 + Math.max(0, (LIMITE_MANCHE - duree) / LIMITE_MANCHE);
       jeu.positionsSuivantes = (jeu.meilleuresPositions || jeu.positions).slice();
       message('Optimal en ' + jeu.meilleurCoups + ' coups, ' + Math.round(duree / 1000) +
         ' s. +' + gagnes.toFixed(2) + ' points.', 'resolu');
     } else if (verdict === 'partiel') {
+      Sons.reussite();
       /* Au prorata de la distance à l'optimal. */
       gagnes = jeu.optimal > 0 ? jeu.optimal / jeu.meilleurCoups : 1;
       jeu.positionsSuivantes = jeu.meilleuresPositions.slice();
       message('Temps écoulé. Meilleure réponse : ' + jeu.meilleurCoups + ' coups contre ' +
         jeu.optimal + ' possibles. +' + gagnes.toFixed(2) + ' point.', 'resolu');
     } else {
+      Sons.echec();
       jeu.positionsSuivantes = jeu.departManche.slice();
       message('Temps écoulé, aucune réponse. La solution est à disposition, ' +
         'prends le temps de la regarder.', 'resolu');
@@ -832,6 +846,7 @@
     var i = jeu.positions.indexOf(pos);
     if (i === -1) return false;
     jeu.selection = i;
+    Sons.selection();
     afficher();
     return true;
   }
@@ -904,9 +919,11 @@
       if (document.hidden) {
         arreterChrono();
         suspendreMinuteurManche();
+        Sons.suspendre();
         sauvegarder();
-      } else if (!jeu.terminee && !manche.close && !jeu.resolu) {
-        demarrerMinuteurManche(manche.cumule);
+      } else {
+        Sons.reprendre();
+        if (!jeu.terminee && !manche.close && !jeu.resolu) demarrerMinuteurManche(manche.cumule);
       }
     });
   }
@@ -920,7 +937,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     ['plateau', 'vignette', 'libelle-jeton', 'compteurs', 'manche', 'coups', 'objectif',
      'temps', 'restant', 'points', 'taux', 'selection', 'message', 'recap',
-     'annuler', 'rejouer', 'solution', 'terminer', 'suivante', 'graine']
+     'annuler', 'rejouer', 'solution', 'terminer', 'suivante', 'graine', 'son']
       .forEach(function (id) {
         el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] =
           document.getElementById(id);
@@ -936,6 +953,20 @@
     }
 
     PlateauPixel.init(el.plateau, plateau);
+    Sons.charger();
+    el.son.textContent = Sons.libelle();
+    el.son.disabled = !Sons.disponible();
+    el.son.addEventListener('click', function () {
+      Sons.cycler();
+      el.son.textContent = Sons.libelle();
+    });
+
+    PlateauPixel.definirImpact(function (cases) { Sons.rebond(cases); });
+    PlateauPixel.definirFinAnimation(function () {
+      var suivant = coupEnFile;
+      coupEnFile = null;
+      if (suivant) deplacer(suivant);
+    });
     if (!reprendre()) nouvellePartie();
     brancher();
 

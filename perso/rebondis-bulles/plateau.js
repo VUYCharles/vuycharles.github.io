@@ -12,9 +12,10 @@
   var COTE = CASE * M.TAILLE;          // 192
   var MARGE = 2;                       // bord de la case autour d'une bulle
   var REBOND = 2;                      // profondeur du rebond, en pixels
-  var MS_PAR_CASE = 20;                // vitesse : la bulle file à cadence fixe
-  var MS_MIN = 60, MS_MAX = 340;
-  var MS_REBOND = 70;
+  var MS_COURSE = 55;                  // durée fixe, quelle que soit la distance
+  var MS_IMPACT = 70;                  // durée de l'écrasement contre l'obstacle
+  var PLAQUAGE = 2;                    // de combien le corps se plaque au mur
+  var TRAINEE = 0.55;                  // intensité de la traînée (0 = invisible)
 
   /* Sprites 8 × 8. '#' = pixel plein. */
   var SPRITES = {
@@ -61,6 +62,30 @@
   };
   SPRITES.vortex = SPRITES.cercle;
 
+  /* Le corps se déforme au lieu de se déplacer : allongé dans l'axe de la
+     course, comprimé dans cet axe au moment du choc. Deux masques suffisent,
+     l'un étant la transposée de l'autre. */
+  var LARGE = [                        // 10 × 6, course horizontale
+    '..######..',
+    '.########.',
+    '##########',
+    '##########',
+    '.########.',
+    '..######..'
+  ];
+  var HAUT = [                         // 6 × 10, course verticale
+    '..##..',
+    '.####.',
+    '######',
+    '######',
+    '######',
+    '######',
+    '######',
+    '######',
+    '.####.',
+    '..##..'
+  ];
+
   var DECALAGES = {
     haut:   { dx: 0,  dy: -1 },
     droite: { dx: 1,  dy: 0  },
@@ -73,6 +98,7 @@
   var anim = null;                     // { bulle, depuis, vers, dx, dy, debut, glisse, total }
   var boucle = null;
   var couleurs = {};
+  var surFin = null, surImpact = null;
 
   /* ------------------------------------------------------------ THÈME --- */
 
@@ -152,6 +178,18 @@
     }
   }
 
+  /* Dessine un masque quelconque centré sur un point. */
+  function corps(motif, cx, cy, couleur) {
+    var h = motif.length, l = motif[0].length;
+    var px = Math.round(cx - l / 2), py = Math.round(cy - h / 2);
+    ctx.fillStyle = couleur;
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < l; x++) {
+        if (motif[y][x] === '#') ctx.fillRect(px + x, py + y, 1, 1);
+      }
+    }
+  }
+
   function spriteVortex(px, py, part) {
     var motif = SPRITES.cercle;
     var quart = [couleurs.rouge, couleurs.vert, couleurs.bleu, couleurs.jaune];
@@ -180,31 +218,66 @@
     }
   }
 
-  function positionBulle(i) {
-    var p = etat.positions[i];
-    var px = M.colonne(p) * CASE + MARGE;
-    var py = M.ligne(p) * CASE + MARGE;
+  function centreCase(p) {
+    return { x: M.colonne(p) * CASE + CASE / 2, y: M.ligne(p) * CASE + CASE / 2 };
+  }
 
-    if (anim && anim.bulle === i) {
-      var t = Date.now() - anim.debut;
-      var dep = { x: M.colonne(anim.depuis) * CASE + MARGE, y: M.ligne(anim.depuis) * CASE + MARGE };
-      if (t < anim.glisse) {
-        /* Vitesse rigoureusement constante, du départ à l'impact : aucune
-           courbe d'entrée ni de sortie. L'œil suit une vitesse uniforme bien
-           mieux qu'une courbe, et un long trajet dure visiblement plus
-           longtemps qu'un court — la distance reste lisible. */
-        var k = t / anim.glisse;
-        px = dep.x + (px + anim.dx * REBOND - dep.x) * k;
-        py = dep.y + (py + anim.dy * REBOND - dep.y) * k;
-      } else {
-        /* Choc : le dépassement se résorbe d'un coup, en amorti. */
-        var r = Math.min(1, (t - anim.glisse) / MS_REBOND);
-        var retour = 1 - (1 - Math.pow(1 - r, 2));
-        px += anim.dx * REBOND * retour;
-        py += anim.dy * REBOND * retour;
-      }
+  /* Renvoie le corps à dessiner pour une bulle : sa forme et son centre.
+     Toute l'énergie du mouvement passe par la déformation — la position, elle,
+     reste rigoureusement sur la grille. */
+  function corpsBulle(i) {
+    var centre = centreCase(etat.positions[i]);
+    var forme = SPRITES.cercle;
+
+    if (!anim || anim.bulle !== i) return { forme: forme, x: centre.x, y: centre.y };
+
+    var t = Date.now() - anim.debut;
+    var depart = centreCase(anim.depuis);
+    var horizontal = anim.dx !== 0;
+
+    if (t < anim.glisse) {
+      /* Course : vitesse constante, corps étiré dans l'axe. */
+      var k = t / anim.glisse;
+      return {
+        forme: horizontal ? LARGE : HAUT,
+        x: depart.x + (centre.x - depart.x) * k,
+        y: depart.y + (centre.y - depart.y) * k
+      };
     }
-    return { x: Math.round(px), y: Math.round(py) };
+
+    if (!anim.choque) {
+      anim.choque = true;
+      if (surImpact) surImpact(anim.cases);      // c'est ici que le son tombe
+    }
+
+    /* Choc : le corps s'aplatit contre l'obstacle, comprimé dans l'axe de sa
+       course, et se plaque contre lui. Il ne recule pas — l'énergie part dans
+       la forme, jamais dans un rebond. */
+    var r = Math.min(1, (t - anim.glisse) / MS_IMPACT);
+    var reste = 1 - r;
+    return {
+      forme: reste > 0.45 ? (horizontal ? HAUT : LARGE) : SPRITES.cercle,
+      x: centre.x + anim.dx * PLAQUAGE * reste,
+      y: centre.y + anim.dy * PLAQUAGE * reste
+    };
+  }
+
+  /* Traînée : une bande derrière la bulle, qui s'efface avec le choc. */
+  function dessinerTrainee() {
+    if (!anim || TRAINEE <= 0) return;
+    var t = Date.now() - anim.debut;
+    var depart = centreCase(anim.depuis);
+    var corps0 = corpsBulle(anim.bulle);
+    var part = t < anim.glisse
+      ? TRAINEE
+      : TRAINEE + (1 - TRAINEE) * Math.min(1, (t - anim.glisse) / MS_IMPACT);
+    if (part >= 1) return;
+
+    var teinte = estomper(couleurs[M.COULEURS[anim.bulle]], couleurs.fond, part);
+    var x1 = Math.min(depart.x, corps0.x), x2 = Math.max(depart.x, corps0.x);
+    var y1 = Math.min(depart.y, corps0.y), y2 = Math.max(depart.y, corps0.y);
+    if (anim.dx !== 0) pixel(Math.round(x1), Math.round(y1 - 1), Math.round(x2 - x1), 2, teinte);
+    else pixel(Math.round(x1 - 1), Math.round(y1), 2, Math.round(y2 - y1), teinte);
   }
 
   function dessiner() {
@@ -240,22 +313,29 @@
 
     dessinerMurs();
 
-    /* Bulles. */
-    for (var b = 0; b < 4; b++) {
-      var pos = positionBulle(b);
-      sprite(SPRITES.cercle, pos.x, pos.y, couleurs[M.COULEURS[b]], false);
-    }
-
-    /* Repère de sélection : un cadre d'un pixel autour de la case. */
-    if (!etat.resolu) {
-      var s = etat.positions[etat.selection];
-      var sx = M.colonne(s) * CASE, sy = M.ligne(s) * CASE;
+    /* Repère de sélection, sous les bulles : le corps étiré déborde jusqu'aux
+       bords de la case, un cadre dessiné par-dessus lui mangerait ses
+       extrémités. */
+    /* Pendant la course, le cadre est masqué : sinon il apparaîtrait sur la
+       case d'arrivée avant que le corps n'y soit, et annoncerait le résultat. */
+    if (!etat.resolu && !(anim && anim.bulle === etat.selection)) {
+      var sel = etat.positions[etat.selection];
+      var sx = M.colonne(sel) * CASE, sy = M.ligne(sel) * CASE;
       ctx.fillStyle = couleurs.texte;
       ctx.fillRect(sx + 1, sy + 1, CASE - 2, 1);
       ctx.fillRect(sx + 1, sy + CASE - 2, CASE - 2, 1);
       ctx.fillRect(sx + 1, sy + 1, 1, CASE - 2);
       ctx.fillRect(sx + CASE - 2, sy + 1, 1, CASE - 2);
     }
+
+    dessinerTrainee();
+
+    /* Bulles. */
+    for (var b = 0; b < 4; b++) {
+      var c = corpsBulle(b);
+      corps(c.forme, c.x, c.y, couleurs[M.COULEURS[b]]);
+    }
+
   }
 
   /* --------------------------------------------------------- BOUCLE --- */
@@ -267,6 +347,7 @@
       anim = null;
       dessiner();
       boucle = null;
+      if (surFin) surFin();          // le coup mis en file peut partir
       return;
     }
     boucle = global.requestAnimationFrame(tourner);
@@ -316,15 +397,19 @@
     animer: function (bulle, depuis, vers, direction) {
       if (!ctx) return;
       if (mouvementReduit()) { dessiner(); return; }
-      if (anim) { anim = null; }                 // la précédente se termine net
       var d = DECALAGES[direction];
-      var cases = Math.abs(M.colonne(vers) - M.colonne(depuis)) +
-                  Math.abs(M.ligne(vers) - M.ligne(depuis));
-      var glisse = Math.max(MS_MIN, Math.min(MS_MAX, cases * MS_PAR_CASE));
+      /* Durée constante : une bulle qui traverse le plateau met le même temps
+         qu'une bulle qui avance d'une case. C'est donc la vitesse qui suit la
+         distance, et non l'inverse — un long trajet est une ruée, pas un
+         voyage. La traînée reste ce qui rend le trajet relisible. */
+      var glisse = MS_COURSE;
       anim = {
         bulle: bulle, depuis: depuis, vers: vers,
+        cases: Math.abs(M.colonne(vers) - M.colonne(depuis)) +
+               Math.abs(M.ligne(vers) - M.ligne(depuis)),
+        choque: false,
         dx: d.dx, dy: d.dy,
-        debut: Date.now(), glisse: glisse, total: glisse + MS_REBOND
+        debut: Date.now(), glisse: glisse, total: glisse + MS_IMPACT
       };
       lancer();
     },
@@ -339,6 +424,16 @@
       if (x < 0 || y < 0 || x >= M.TAILLE || y >= M.TAILLE) return -1;
       return M.index(x, y);
     },
+
+    /* Une animation est-elle en cours ? Sert à mettre le coup suivant en
+       file plutôt qu'à écraser celui qui court. */
+    enMouvement: function () { return !!anim; },
+
+    /* Rappel déclenché à la fin de chaque animation. */
+    definirFinAnimation: function (cb) { surFin = cb; },
+
+    /* Rappel déclenché à l'instant précis du choc, pas à la fin du coup. */
+    definirImpact: function (cb) { surImpact = cb; },
 
     rafraichir: function () { lireCouleurs(); dessiner(); },
     dessiner: dessiner

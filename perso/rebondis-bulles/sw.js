@@ -4,13 +4,14 @@
    polices. Incrémenter CACHE à chaque livraison force la purge côté client.
    ========================================================================= */
 
-var CACHE = 'bulles-v5';
+var CACHE = 'bulles-v8';
 
 var FICHIERS = [
   './',
   'index.html',
   'style.css',
   'moteur.js',
+  'sons.js',
   'plateau.js',
   'interface.js',
   'solveur.js',

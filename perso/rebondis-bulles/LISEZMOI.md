@@ -9,6 +9,7 @@ Puzzle de glissade 16 × 16, jouable au doigt, installable comme application.
 | `index.html` | la page (projet du portfolio + application) |
 | `style.css` | direction artistique Horizon v3.0 |
 | `moteur.js` | plateau, physique de glissade, solveur A* — aucun accès au DOM |
+| `sons.js` | banque sonore synthétisée, aucun fichier audio |
 | `plateau.js` | rendu pixel art sur canvas, glissade et rebond |
 | `interface.js` | entrées, déroulement de la partie |
 | `solveur.js` | Worker : calcule l'objectif hors du fil principal |
@@ -67,14 +68,34 @@ Réglages de l'animation, en tête de `plateau.js` :
 
 | Constante | Rôle | Valeur |
 |---|---|---|
-| `MS_PAR_CASE` | temps par case, vitesse constante | 20 ms |
-| `MS_MIN` / `MS_MAX` | bornes de durée | 60 / 340 ms |
-| `REBOND` | profondeur du rebond à l'impact | 2 px |
-| `MS_REBOND` | durée du retour | 70 ms |
+| `MS_COURSE` | durée d'une course, quelle que soit la distance | 55 ms |
+| `MS_IMPACT` | durée de l'écrasement | 70 ms |
+| `PLAQUAGE` | de combien le corps se plaque au mur | 2 px |
+| `TRAINEE` | intensité de la traînée (0 = aucune) | 0.55 |
 
-La bulle file à vitesse rigoureusement constante, sans courbe d'entrée ni de
-sortie, et s'arrête net sur l'obstacle. Un trajet de dix cases dure donc dix
-fois plus qu'un trajet d'une case : la distance reste lisible à l'œil.
+**La durée d'une course est constante**, une case ou quinze. C'est donc la
+vitesse qui suit la distance : un long trajet est une ruée, pas un voyage.
+De 218 px/s sur une case à 3 273 px/s en travers du plateau, soit environ
+4,5 cases par image sur les trajets les plus longs — c'est la traînée qui
+rend alors le trajet relisible.
+
+**Toute l'énergie passe par la déformation, jamais par la position.** La bulle
+part et s'arrête sans courbe, étirée dans l'axe
+de sa course (10 × 6 px au lieu de 8 × 8). À l'impact elle se comprime dans ce
+même axe (6 × 10) et se plaque contre l'obstacle, puis reprend sa forme. Elle
+ne recule jamais : un rebond raconterait une collision élastique, alors qu'on
+veut un corps qui encaisse.
+
+Une traînée marque le trajet et s'efface avec le choc — elle rend la
+trajectoire relisible après coup, ce qui sert le puzzle autant que le style.
+
+Les sprites déformés `LARGE` et `HAUT` sont des masques dessinés à la main en
+tête de `plateau.js`, l'un étant la transposée de l'autre. Pas de mise à
+l'échelle : la grille de pixels reste intacte.
+
+**Les coups s'enchaînent.** Une touche pressée pendant une course n'est pas
+perdue : elle est mise en file et part à l'instant où la course s'achève.
+C'est ce qui permet de jouer sans temps mort.
 
 L'animation est purement visuelle : le moteur a déjà déplacé la bulle quand
 elle démarre, donc rien ne dépend d'elle. `prefers-reduced-motion: reduce`
@@ -181,3 +202,39 @@ reste devant un bouton mort.
 Relire une solution après avoir résolu ne modifie ni le décompte de la manche
 ni la position de départ de la suivante : les deux sont figés au moment où la
 manche est validée.
+
+
+## Le son
+
+Tout est synthétisé à l'exécution avec Web Audio : **aucun fichier audio**,
+rien à mettre en cache, rien à licencier, et chaque paramètre reste réglable
+dans `sons.js`.
+
+Parti pris, calqué sur la direction artistique : sinus et triangle seulement —
+jamais de dent de scie ni de carré —, passe-bas sur l'ensemble, et une gamme
+**pentatonique** (ré, mi, fa#, la, si), qui ne peut produire aucune dissonance.
+La réverbération est un simple délai rebouclé, quelques nœuds au lieu d'un
+fichier d'impulsion.
+
+| Événement | Son |
+|---|---|
+| Choc contre un obstacle | note descendante + souffle bref ; plus la course est longue, plus la note est grave et le souffle épais |
+| Sélection d'une bulle | clic sinus très court |
+| Jeton posé | deux notes montantes, sobres |
+| Trajet optimal | quatre notes montantes, avec l'octave en écho |
+| Temps écoulé sans réponse | deux notes descendantes |
+
+La musique de fond n'est pas une boucle mais une **nappe générative** : trois
+bourdons légèrement désaccordés avec une respiration très lente, et des notes
+éparses tirées de la gamme toutes les 3 à 7 secondes, avec de longues attaques.
+Rien ne se répète, donc rien ne lasse. **En mode sombre elle descend d'une
+octave et se raréfie** — la même eau, vue au crépuscule.
+
+**Muet par défaut**, avec trois états au bouton : Muet, Effets, Musique. Ce
+n'est pas seulement une question de politesse : les navigateurs interdisent
+tout son avant une action de l'utilisateur, et le contexte audio ne peut donc
+s'ouvrir que sur ce clic. Le réglage est retenu d'une session à l'autre, et le
+son se suspend quand l'onglet passe en arrière-plan.
+
+Sur iPhone, l'interrupteur silencieux physique peut couper le son même en
+mode application.

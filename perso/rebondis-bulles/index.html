@@ -65,6 +65,7 @@
       <div class="modes" role="group" aria-label="Mode de jeu">
         <button type="button" data-mode="classique" aria-pressed="true">Classique</button>
         <button type="button" data-mode="rapide" aria-pressed="false">Rapide</button>
+        <button type="button" id="son" class="btn-son" aria-label="Réglage du son">Muet</button>
       </div>
       <div class="jeton-affiche">
         <span id="vignette" class="vignette" aria-hidden="true"></span>
@@ -119,6 +120,7 @@
     <div class="ligne"><span>Moteur</span><span class="valeur">glissade et collisions, sans dépendance</span></div>
     <div class="ligne"><span>Plateau</span><span class="valeur" id="graine">—</span></div>
     <div class="ligne"><span>Modes</span><span class="valeur">classique 17 manches, rapide chronométré</span></div>
+    <div class="ligne"><span>Son</span><span class="valeur">synthèse Web Audio, aucun fichier</span></div>
     <div class="ligne"><span>Rendu</span><span class="valeur">canvas 192 px, pixel art animé</span></div>
     <div class="ligne"><span>Solveur</span><span class="valeur">A* canonique, heuristique relâchée</span></div>
     <div class="ligne"><span>Calcul</span><span class="valeur">Web Worker, optimal exact ≤ 13 coups</span></div>
@@ -139,6 +141,7 @@
 </div>
 
 <script src="moteur.js"></script>
+<script src="sons.js"></script>
 <script src="plateau.js"></script>
 <script src="interface.js"></script>
 </body>

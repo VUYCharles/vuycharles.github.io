@@ -189,6 +189,11 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   margin-bottom: 24px;
 }
 
+.modes .btn-son {
+  flex: 0 0 auto;
+  min-width: 74px;
+}
+
 .modes button {
   flex: 1;
   padding: 8px 10px;
