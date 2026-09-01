@@ -40,13 +40,13 @@
     try { ctx = new Ctx(); } catch (e) { return false; }
 
     maitre = ctx.createGain();
-    maitre.gain.value = 0.5;
+    maitre.gain.value = 1.0;
 
     /* Un passe-bas doux sur l'ensemble : la surface absorbe la lumière
        plutôt que de la renvoyer. */
     var doux = ctx.createBiquadFilter();
     doux.type = 'lowpass';
-    doux.frequency.value = 3200;
+    doux.frequency.value = 5000;
     maitre.connect(doux);
     doux.connect(ctx.destination);
 
@@ -64,12 +64,12 @@
     sortieEcho.connect(maitre);
 
     busEffets = ctx.createGain();
-    busEffets.gain.value = 0.55;
+    busEffets.gain.value = 1.0;
     busEffets.connect(maitre);
     busEffets.connect(echo);
 
     busMusique = ctx.createGain();
-    busMusique.gain.value = 0.0;
+    busMusique.gain.value = 1.0;
     busMusique.connect(maitre);
     busMusique.connect(echo);
 
@@ -89,7 +89,7 @@
     }
 
     var enveloppe = ctx.createGain();
-    var pic = options.volume === undefined ? 0.18 : options.volume;
+    var pic = options.volume === undefined ? 0.4 : options.volume;
     var attaque = options.attaque === undefined ? 0.004 : options.attaque;
     var duree = options.duree === undefined ? 0.18 : options.duree;
     enveloppe.gain.setValueAtTime(0.0001, t0);
