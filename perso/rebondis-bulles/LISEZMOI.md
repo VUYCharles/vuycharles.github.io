@@ -199,9 +199,17 @@ bouton propose « Chercher la solution » et relance une recherche à 20 coups �
 moins d'une seconde, dans le Worker. Il n'existe donc plus de cas où le joueur
 reste devant un bouton mort.
 
-Relire une solution après avoir résolu ne modifie ni le décompte de la manche
-ni la position de départ de la suivante : les deux sont figés au moment où la
-manche est validée.
+## Retenter une manche
+
+En classique, résoudre une manche ne la ferme pas : **Rejouer** la rouvre au
+départ pour viser mieux, autant de fois qu'on veut. C'est **la meilleure
+tentative** qui est retenue, jamais la dernière — retenter ne peut donc pas
+faire perdre de points, et la position d'où repart la manche suivante est celle
+de cette meilleure tentative. « Manche suivante » reste disponible dès qu'une
+réponse existe, même en pleine nouvelle tentative.
+
+Relire une solution ne modifie rien non plus : décompte et position sont figés
+sur la meilleure réponse.
 
 
 ## Le son

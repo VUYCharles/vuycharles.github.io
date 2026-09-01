@@ -255,8 +255,15 @@
     jeu.coups = 0;
     jeu.historique = [];
     jeu.etapeSolution = 0;
+    /* Rouvrir la manche, sinon le plateau revient au départ mais reste gelé :
+       deplacer() refuse tout coup tant que la manche est marquée résolue. */
+    jeu.resolu = false;
+    coupEnFile = null;
+    demarrerMinuteurManche(manche.cumule);
     afficher();
-    message('Position de départ de la manche rétablie.');
+    message(jeu.coupsRetenus
+      ? 'Nouvelle tentative. Meilleure réponse jusqu\'ici : ' + jeu.coupsRetenus + ' coups.'
+      : 'Position de départ de la manche rétablie.');
     sauvegarder();
   }
 
@@ -266,6 +273,7 @@
     jeu.positions = avant.positions;
     jeu.selection = avant.selection;
     jeu.coups--;
+    jeu.resolu = false;
     afficher();
     message('Coup annulé.');
     sauvegarder();
@@ -316,10 +324,14 @@
     if (!rapide()) {
       jeu.resolu = true;
       jeu.revele = true;
-      /* On fige le score et la position d'arrivée : relire la solution après
-         coup ne doit ni changer le décompte, ni décaler la manche suivante. */
-      jeu.coupsRetenus = jeu.coups;
-      jeu.positionsSuivantes = jeu.positions.slice();
+      /* Score et position d'arrivée figés sur la MEILLEURE tentative : relire
+         la solution ou retenter moins bien ne doit ni changer le décompte,
+         ni décaler la manche suivante. */
+      var progres = !jeu.coupsRetenus || jeu.coups < jeu.coupsRetenus;
+      if (progres) {
+        jeu.coupsRetenus = jeu.coups;
+        jeu.positionsSuivantes = jeu.positions.slice();
+      }
       suspendreMinuteurManche();
       vibrer([10, 60, 10]);
       if (!jeu.assistee && jeu.optimal > 0 && jeu.coups === jeu.optimal) Sons.optimal();
@@ -328,7 +340,11 @@
         (jeu.coups > 1 ? 's' : '') + '. ';
       if (jeu.assistee) texte += 'Solution consultée.';
       else if (jeu.optimal > 0 && jeu.coups === jeu.optimal) texte += 'Optimal.';
-      else if (jeu.optimal > 0) texte += 'Optimal : ' + jeu.optimal + '.';
+      else if (jeu.optimal > 0) {
+        texte += 'Optimal : ' + jeu.optimal + '. ';
+        texte += progres ? 'Rejouer pour retenter.'
+          : 'Meilleure réponse conservée : ' + jeu.coupsRetenus + '.';
+      }
       texte += jeu.paquet.length
         ? ' ' + jeu.paquet.length + ' jeton' + (jeu.paquet.length > 1 ? 's' : '') + ' restant' +
           (jeu.paquet.length > 1 ? 's' : '') + '.'
@@ -812,7 +828,8 @@
     el.rejouer.disabled = bloque;
     el.terminer.hidden = !rapide();
     el.terminer.disabled = jeu.terminee;
-    el.suivante.disabled = !jeu.resolu && !jeu.terminee;
+    el.suivante.disabled = !jeu.terminee && !jeu.resolu &&
+      !(!rapide() && jeu.coupsRetenus > 0);
     el.suivante.textContent = jeu.terminee ? 'Nouvelle partie'
       : (rapide() || jeu.paquet.length ? 'Manche suivante' : 'Terminer la partie');
 
