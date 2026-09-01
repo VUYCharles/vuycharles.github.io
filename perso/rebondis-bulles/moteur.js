@@ -50,15 +50,18 @@
      posé à un décalage tiré au sort dans sa plage. Les plages sont disjointes
      pour que les murs ne se massent pas au même endroit. */
   var ANCRAGES_BORDS = [
-    { bord: 'haut',   plage: [2, 5] },
-    { bord: 'haut',   plage: [9, 13] },
-    { bord: 'bas',    plage: [1, 5] },
-    { bord: 'bas',    plage: [9, 13] },
-    { bord: 'gauche', plage: [2, 5] },
-    { bord: 'gauche', plage: [9, 13] },
-    { bord: 'droite', plage: [2, 5] },
-    { bord: 'droite', plage: [9, 13] }
+    { bord: 'haut',   plage: [1, 4] },  { bord: 'haut',   plage: [6, 9] },  { bord: 'haut',   plage: [11, 14] },
+    { bord: 'bas',    plage: [1, 4] },  { bord: 'bas',    plage: [6, 9] },  { bord: 'bas',    plage: [11, 14] },
+    { bord: 'gauche', plage: [1, 4] },  { bord: 'gauche', plage: [6, 9] },  { bord: 'gauche', plage: [11, 14] },
+    { bord: 'droite', plage: [1, 4] },  { bord: 'droite', plage: [6, 9] },  { bord: 'droite', plage: [11, 14] }
   ];
+
+  /* Quadrants : les quatre jetons d'un même quadrant reçoivent quatre
+     orientations distinctes, pour qu'aucun coin du plateau ne se retrouve
+     avec tous ses murs tournés du même côté. */
+  function quadrant(j) {
+    return (j.x < 8 ? 0 : 1) + (j.y < 8 ? 0 : 2);
+  }
 
   /* Les quatre orientations possibles d'un coin en "L". */
   var COINS = [
@@ -100,6 +103,32 @@
   /* Un mur est refusé s'il porte une case — ou sa voisine — à trois côtés
      fermés. Sur quatre côtés, trois murs sont forcément consécutifs : c'est
      le "U" dont on ne veut pas, une impasse à sortie unique. */
+  /* Les deux extrémités d'un segment de mur, en coordonnées de sommets de
+     la grille (0..16). Deux murs qui partagent un sommet forment un angle
+     ou un escalier : c'est ce qu'on interdit, hors des deux branches d'un
+     même coin en "L". */
+  function sommetsDuMur(x, y, cote) {
+    if (cote === 'top')    return [[x, y], [x + 1, y]];
+    if (cote === 'bottom') return [[x, y + 1], [x + 1, y + 1]];
+    if (cote === 'left')   return [[x, y], [x, y + 1]];
+    return [[x + 1, y], [x + 1, y + 1]];
+  }
+
+  function cleSommet(s) { return s[0] + ':' + s[1]; }
+
+  function sommetsLibres(occupes, murs) {
+    var propres = {};
+    for (var i = 0; i < murs.length; i++) {
+      var bouts = sommetsDuMur(murs[i][0], murs[i][1], murs[i][2]);
+      for (var b = 0; b < 2; b++) {
+        var k = cleSommet(bouts[b]);
+        if (occupes[k]) return false;
+        propres[k] = true;      // partagé entre les deux branches du L : toléré
+      }
+    }
+    return propres;
+  }
+
   function murAcceptable(cellules, x, y, cote) {
     var c = cellules[index(x, y)];
     if (c[cote]) return true;
@@ -139,6 +168,14 @@
     for (var i = 0; i < TAILLE * TAILLE; i++) {
       cellules.push({ top: false, right: false, bottom: false, left: false, bloquee: false });
     }
+    var occupes = {};   // sommets déjà pris par un mur
+
+    function enregistrer(murs) {
+      murs.forEach(function (m) {
+        poserMur(cellules, m[0], m[1], m[2]);
+        sommetsDuMur(m[0], m[1], m[2]).forEach(function (b) { occupes[cleSommet(b)] = true; });
+      });
+    }
 
     /* Bords extérieurs. */
     for (var k = 0; k < TAILLE; k++) {
@@ -148,51 +185,59 @@
       cellules[index(TAILLE - 1, k)].right = true;
     }
 
-    /* Bloc central infranchissable et son pourtour. */
+    /* Bloc central : infranchissable, et son pourtour occupe des sommets
+       pour qu'aucun mur ne vienne s'y accrocher. */
     CENTRE.forEach(function (c) { cellules[index(c[0], c[1])].bloquee = true; });
     CENTRE.forEach(function (c) {
       NOMS_DIRECTIONS.forEach(function (nom) {
         var d = DIRECTIONS[nom];
         var nx = c[0] + d.dx, ny = c[1] + d.dy;
         var interne = CENTRE.some(function (o) { return o[0] === nx && o[1] === ny; });
-        if (!interne) poserMur(cellules, c[0], c[1], d.mur);
+        if (!interne) enregistrer([[c[0], c[1], d.mur]]);
       });
     });
 
-    /* Murs de bord : décalage tiré au sort dans la plage de l'ancrage. */
+    /* Murs de bord : un par ancrage, décalage tiré dans sa plage. */
     for (var a = 0; a < ANCRAGES_BORDS.length; a++) {
       var ancrage = ANCRAGES_BORDS[a];
       var offsets = melanger(plage(ancrage.plage), rng);
       var pose = false;
       for (var o = 0; o < offsets.length && !pose; o++) {
         var m = murDeBord(ancrage.bord, offsets[o]);
-        if (murAcceptable(cellules, m.x, m.y, m.cote)) {
-          poserMur(cellules, m.x, m.y, m.cote);
+        var mur = [[m.x, m.y, m.cote]];
+        if (murAcceptable(cellules, m.x, m.y, m.cote) && sommetsLibres(occupes, mur)) {
+          enregistrer(mur);
           pose = true;
         }
       }
       if (!pose && !force) return null;
     }
 
-    /* Coins des jetons : une orientation sur quatre, tirée au sort parmi
-       celles qui ne referment pas une case sur trois côtés. */
+    /* Coins des jetons. Chaque quadrant épuise les quatre orientations avant
+       d'en réutiliser une : pas de coin du plateau uniformément orienté. */
+    var reserves = {};
     var jetons = [];
     for (var j = 0; j < JETONS.length; j++) {
       var jeton = JETONS[j];
-      var choix = melanger(COINS, rng);
-      var retenu = null;
-      for (var c2 = 0; c2 < choix.length && !retenu; c2++) {
-        if (murAcceptable(cellules, jeton.x, jeton.y, choix[c2][0]) &&
-            murAcceptable(cellules, jeton.x, jeton.y, choix[c2][1])) {
-          retenu = choix[c2];
+      var q = quadrant(jeton);
+      if (!reserves[q] || !reserves[q].length) reserves[q] = melanger(COINS, rng);
+
+      var retenu = null, rang = -1;
+      for (var c2 = 0; c2 < reserves[q].length && !retenu; c2++) {
+        var coin = reserves[q][c2];
+        var murs = [[jeton.x, jeton.y, coin[0]], [jeton.x, jeton.y, coin[1]]];
+        if (murAcceptable(cellules, jeton.x, jeton.y, coin[0]) &&
+            murAcceptable(cellules, jeton.x, jeton.y, coin[1]) &&
+            sommetsLibres(occupes, murs)) {
+          retenu = coin; rang = c2;
         }
       }
       if (!retenu) {
         if (!force) return null;
-        retenu = COINS[0];
+        retenu = COINS[0]; rang = 0;
       }
-      poserMur(cellules, jeton.x, jeton.y, retenu[0]);
-      poserMur(cellules, jeton.x, jeton.y, retenu[1]);
+      reserves[q].splice(rang, 1);
+      enregistrer([[jeton.x, jeton.y, retenu[0]], [jeton.x, jeton.y, retenu[1]]]);
       jetons.push({
         x: jeton.x, y: jeton.y, couleur: jeton.couleur, forme: jeton.forme, murs: retenu
       });
@@ -200,6 +245,7 @@
 
     var plateau = { taille: TAILLE, cellules: cellules, jetons: jetons };
     if (!force && casesIsolees(plateau).length) return null;
+    if (!force && casesTroisMurs(plateau).length) return null;
     return plateau;
   }
 

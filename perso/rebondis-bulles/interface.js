@@ -788,6 +788,7 @@
       '. Bulle sélectionnée : ' + NOMS[M.COULEURS[jeu.selection]] + '.');
 
     el.compteurs.dataset.mode = jeu.mode;
+    if (el.graine) el.graine.textContent = 'graine ' + jeu.graine;
     el.vignette.innerHTML = svgForme(jeton);
     el.libelleJeton.textContent = nomJeton(jeton);
     el.selection.textContent = NOMS[M.COULEURS[jeu.selection]];
@@ -919,7 +920,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     ['plateau', 'vignette', 'libelle-jeton', 'compteurs', 'manche', 'coups', 'objectif',
      'temps', 'restant', 'points', 'taux', 'selection', 'message', 'recap',
-     'annuler', 'rejouer', 'solution', 'terminer', 'suivante']
+     'annuler', 'rejouer', 'solution', 'terminer', 'suivante', 'graine']
       .forEach(function (id) {
         el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] =
           document.getElementById(id);

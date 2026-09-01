@@ -131,12 +131,27 @@ Les emplacements des 17 jetons sont fixes — ils sont répartis par quadrant po
 garder un plateau équilibré — mais **l'orientation de chaque coin en « L » et
 la position des huit murs de bord sont tirées au sort à chaque partie**.
 
-La seule contrainte est qu'aucune case jouable ne doit se retrouver fermée sur
-trois côtés : avec quatre côtés, trois murs sont forcément consécutifs, ce qui
-crée un « U », une impasse à sortie unique. La pose est donc gloutonne — pour
-chaque coin, les quatre orientations sont essayées dans un ordre aléatoire et
-la première acceptable est retenue. Vérifié sur 500 graines : zéro U, zéro case
-isolée, orientations équiréparties, et zéro jeton hors de portée de 13 coups.
+Quatre règles encadrent le tirage :
+
+1. **Pas de U.** Aucune case jouable fermée sur trois côtés — sur quatre côtés,
+   trois murs sont forcément consécutifs, et la case devient une impasse à
+   sortie unique.
+2. **Pas de murs qui se touchent.** Deux segments ne peuvent pas partager un
+   sommet de la grille, hors des deux branches d'un même coin. Sans cette
+   règle, les murs forment des escaliers et des recoins qu'aucun plateau bien
+   conçu ne comporte. Le pourtour du bloc central occupe lui aussi ses
+   sommets : rien ne peut venir s'y accrocher.
+3. **Quatre orientations par quadrant.** Les quatre jetons d'un même quadrant
+   épuisent les quatre orientations avant qu'une seule soit réutilisée, ce qui
+   interdit un coin de plateau dont tous les murs regardent du même côté.
+4. **Douze murs de bord**, trois par bord, dans des plages disjointes.
+
+Vérifié sur 400 graines : zéro U, zéro case isolée, zéro mur qui se touche,
+quatre orientations distinctes dans chaque quadrant à chaque fois, 27 murs
+verticaux et 27 horizontaux — exactement la densité du plateau fixe d'origine.
+
+La graine du plateau est affichée dans le bloc technique : elle suffit à
+rejouer un plateau à l'identique.
 
 **La graine circule.** Le solveur tourne dans un Worker qui reconstruit le
 plateau de son côté : chaque requête porte donc la graine, sans quoi il
